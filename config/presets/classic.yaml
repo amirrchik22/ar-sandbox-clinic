@@ -1,0 +1,9 @@
+name: Классика
+palette: classic
+contour_step_mm: 10
+water: true
+sound: false
+transition_speed: 0.6
+hand_mode: 0          # руки красятся как в обычной песочнице
+tasks: [dam, lake, mountain]
+default_minutes: 20

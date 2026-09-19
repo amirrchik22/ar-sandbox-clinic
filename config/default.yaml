@@ -1,0 +1,40 @@
+sensor:
+  name: fake               # fake | kinect2 | orbbec
+  fps: 30
+  smoothing_alpha: 0.25
+  hand_mm: 30
+  hand_max_rate_mm_s: 150
+  hand_dilate_px: 6
+
+box:
+  inner_mm: [1000, 750]
+  positions: [floor, table]   # у каждого свой профиль в config/profiles/<name>.json
+  active_position: floor
+  sand_range_mm: [0, 200]
+
+render:
+  display_index: 1
+  resolution: [1024, 768]
+  fps: 30
+  max_color_delta_per_s: 0.5  # ограничитель мерцания
+
+record:
+  root: data/sessions
+  heightmap_fps: 10
+  rgb: {width: 1920, height: 1080, fps: 15, hw: vaapi, bitrate: 4M}
+  render: {fps: 15, bitrate: 1500k}
+  screenshot_every_s: 30
+  segment_s: 60
+  min_free_pct_warn: 10
+  min_free_pct_block: 3
+
+projector:
+  control: pjlink            # pjlink | rs232 | none
+  host: 192.168.50.20
+  poll_s: 30
+
+console:
+  host: 0.0.0.0
+  port: 8080
+  session_minutes_default: 20
+  soft_end_minutes: 2

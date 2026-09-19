@@ -1,0 +1,14 @@
+[Unit]
+Description=AR-песочница: Рендер на проектор
+After=graphical.target sandbox-depth.service
+
+[Service]
+User=sandbox
+WorkingDirectory=/opt/ar-sandbox-clinic
+Environment=DISPLAY=:0
+ExecStart=/opt/ar-sandbox-clinic/.venv/bin/python -m sandbox.render.main
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

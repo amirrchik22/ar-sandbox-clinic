@@ -1,0 +1,9 @@
+name: Контраст
+palette: contrast
+contour_step_mm: 30
+water: false
+sound: false
+transition_speed: 0.3
+hand_mode: 1
+tasks: []
+default_minutes: 15

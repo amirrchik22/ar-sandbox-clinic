@@ -1,0 +1,9 @@
+name: Спокойная карта
+palette: calm
+contour_step_mm: 20
+water: false
+sound: false
+transition_speed: 0.3
+hand_mode: 1          # руки не красим
+tasks: []
+default_minutes: 15

@@ -1,0 +1,14 @@
+[Unit]
+Description=AR-песочница: Наблюдатель
+After=graphical.target sandbox-console.service
+
+[Service]
+User=sandbox
+WorkingDirectory=/opt/ar-sandbox-clinic
+Environment=DISPLAY=:0
+ExecStart=/opt/ar-sandbox-clinic/.venv/bin/python -m sandbox.supervisor.main
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target
