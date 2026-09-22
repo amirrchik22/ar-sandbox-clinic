@@ -1,4 +1,10 @@
-# Kinect v2 и Orbbec доступны пользователю без root, питание USB не отключается
+# Датчики доступны пользователю без root, питание USB не отключается
+# Kinect v1 (Xbox 360) — базовый: камера 02ae, мотор 02b0, аудио 02ad
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02ae", MODE="0666", ATTR{power/autosuspend}="-1"
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02b0", MODE="0666", ATTR{power/autosuspend}="-1"
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02ad", MODE="0666", ATTR{power/autosuspend}="-1"
+# Kinect v2 — запасной
 SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02c4", MODE="0666", ATTR{power/autosuspend}="-1"
 SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02d8", MODE="0666", ATTR{power/autosuspend}="-1"
+# Orbbec — будущий аналог
 SUBSYSTEM=="usb", ATTR{idVendor}=="2bc5", MODE="0666", ATTR{power/autosuspend}="-1"

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>План работ — AR-песочница для клиники</title>
+<meta name="description" content="План работ. Документация проекта «AR-песочница для клиники».">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fafaf8;
+  --bg-2: #f1f0ec;
+  --text: #1d232a;
+  --muted: #5d6771;
+  --line: #e2dfd7;
+  --accent: #1a8c9c;
+  --accent-text: #ffffff;
+  --code-bg: #efeee9;
+  --font-head: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1317;
+    --bg-2: #161c22;
+    --text: #e6e9ec;
+    --muted: #9aa5ae;
+    --line: #2a323b;
+    --accent: #3fb3c3;
+    --accent-text: #0f1317;
+    --code-bg: #1a2129;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1317;
+  --bg-2: #161c22;
+  --text: #e6e9ec;
+  --muted: #9aa5ae;
+  --line: #2a323b;
+  --accent: #3fb3c3;
+  --accent-text: #0f1317;
+  --code-bg: #1a2129;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 2.2em 0 0.6em;
+}
+h1 { font-size: 2rem; margin-top: 0.4em; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; padding-top: 0.6em; border-top: 1px solid var(--line); }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
+h2 a.anchor, h3 a.anchor { color: inherit; }
+p { margin: 0 0 1em; }
+ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
+li { margin: 0.25em 0; }
+li > ul, li > ol { margin-top: 0.25em; margin-bottom: 0.25em; }
+li > p { margin-bottom: 0.5em; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+strong { font-weight: 600; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: var(--code-bg);
+  padding: 0.9em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0 0 1.2em;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+blockquote {
+  margin: 0 0 1em;
+  padding: 0.2em 1em;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+.table-wrap { overflow-x: auto; margin: 0 0 1.4em; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 0.5em 0.7em; border-bottom: 1px solid var(--line); }
+th { font-family: var(--font-head); font-weight: 700; font-size: 0.85rem; color: var(--muted); border-bottom: 2px solid var(--line); white-space: nowrap; }
+td { min-width: 8em; }
+
+@media (max-width: 560px) {
+  .table-wrap:has(table.stack) { overflow-x: visible; }
+  td { min-width: 0; }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: auto; }
+  table.stack thead { display: none; }
+  table.stack tr { border: 1px solid var(--line); border-radius: 8px; background: var(--bg-2); padding: 0.7em 0.9em; margin: 0 0 0.8em; }
+  table.stack td { border: 0; padding: 0.18em 0; min-width: 0; }
+  table.stack td[data-h]::before { content: attr(data-h) ": "; color: var(--muted); font-family: var(--font-head); font-weight: 700; font-size: 0.78rem; }
+  table.stack td:first-child { font-family: var(--font-head); font-weight: 700; font-size: 1.02rem; margin-bottom: 0.3em; }
+  table.stack td:first-child[data-h]::before { content: none; }
+}
+figure { margin: 1.4em 0; }
+figure img { display: block; width: 100%; max-width: 100%; height: auto; background: #fff; border-radius: 6px; border: 1px solid var(--line); }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5em; }
+img { max-width: 100%; }
+.check { font-family: var(--font-mono); color: var(--muted); margin-right: 0.3em; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: 20px; }
+
+.site-header { border-bottom: 1px solid var(--line); background: var(--bg); }
+.site-header .wrap { padding-block: 14px 10px; }
+.brand { font-family: var(--font-head); font-weight: 800; font-size: 1.05rem; color: var(--text); display: inline-block; margin-bottom: 8px; }
+.brand:hover { text-decoration: none; color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.9rem; }
+.nav a { color: var(--muted); white-space: nowrap; }
+.nav a:hover { color: var(--accent); text-decoration: none; }
+.nav a.active { color: var(--text); font-weight: 600; }
+.nav a.ext::after { content: " \2197"; font-size: 0.8em; }
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.35em 0.9em;
+  border-radius: 6px;
+}
+.btn:hover { background: var(--accent); color: var(--accent-text); text-decoration: none; }
+.btn.primary { background: var(--accent); color: var(--accent-text); }
+.btn.primary:hover { opacity: 0.9; }
+
+main.wrap { padding-block: 24px 40px; }
+.back { margin-bottom: 1.4em; }
+.back-bottom { margin-top: 2.5em; }
+.toc { background: var(--bg-2); border-radius: 8px; padding: 0.9em 1.2em; margin: 1.4em 0 2em; font-size: 0.92rem; }
+.toc-title { font-family: var(--font-head); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.4em; }
+.toc ol { margin: 0; padding-left: 1.3em; columns: 2; column-gap: 2em; }
+.toc li { break-inside: avoid; margin: 0.15em 0; }
+@media (max-width: 560px) { .toc ol { columns: 1; } }
+
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+.site-footer .wrap { padding-block: 18px 28px; display: flex; flex-wrap: wrap; gap: 6px 20px; justify-content: space-between; }
+.site-footer a { color: var(--muted); }
+.site-footer a:hover { color: var(--accent); }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">AR-песочница для клиники</a>
+    <nav class="nav" aria-label="Разделы"><a href="index.html">Главная</a><a href="wall-placement.html">Размещение у стены</a><a href="wall-layout-3d.html">3D-проверка</a><a href="hardware.html">Железо</a><a href="mounting.html">Крепление</a><a href="pipeline.html">Цикл и руки</a><a href="architecture.html">Архитектура ПО</a><a href="software-plan.html">План ПО</a><a href="roadmap.html" class="active">План работ</a><a href="https://amirrchik22.github.io/ar-sandbox/" class="ext" target="_blank" rel="noopener">Презентация для клиента</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <p class="back"><a class="btn" href="index.html">&larr; Главная</a></p>
+<h1 id="план-работ">План работ</h1>
+<p>Обновлено 22.09.2026 по решениям заказчика: базовый датчик Kinect v1, запасной Kinect v2, проектор среднего сегмента, крепление только к стене, быстрый отклик в приоритете (цель — не больше 150 мс от движения руки до перекраски). Подробно — <a href="architecture.html"><code>architecture.md</code></a> (разделы 3.10 и 4), понятным языком — <a href="software-plan.html"><code>software-plan.md</code></a>.</p>
+<div class="table-wrap"><table class="stack"><thead><tr><th>Этап</th><th>Срок</th><th>Содержание</th><th>Готово, когда</th></tr></thead><tbody><tr><td data-h="Этап">0. Magic Sand — проверка железа за неделю</td><td data-h="Срок">1 неделя, без кода</td><td data-h="Содержание">На имеющемся ПК (Windows допустима) ставим Magic Sand; Kinect v1 на штатном месте (1,35 м от пола над центром ящика), проектор объективом вниз (объектив 1,95 м от пола), игровой режим, трапеция и интерполяция кадров выключены; калибровка по мастеру Magic Sand; замер задержки телефоном 240 к/с; час непрерывной работы</td><td data-h="Готово, когда">Датчик даёт устойчивую карту час без сбоев; картинка накрывает ящик с запасом; измеренная задержка ≤ 180 мс (медиана из пяти замеров); результаты записаны в журнал установки. Если задержка выше или карта шумит — принято решение: убрать лишнее звено или перейти на Kinect v2</td></tr><tr><td data-h="Этап">0 (параллельно). Требования</td><td data-h="Срок">2 недели</td><td data-h="Содержание">Интервью 3–5 специалистов клиники, группы детей, протокол занятия, форма согласия на видео, осмотр кабинета (материал стены, высота натяжного потолка над ящиком, плинтус, розетки, сеть)</td><td data-h="Готово, когда">Документ требований подписан клиникой; список режимов и полей отчёта согласован; стена и потолок замерены, глубина ящика (750 или 600) выбрана</td></tr><tr><td data-h="Этап">1. Прототип</td><td data-h="Срок">6–8 недель</td><td data-h="Содержание">Сервис датчика (Kinect v1 через libfreenect / Kinect SDK 1.8, Kinect v2 через libfreenect2 / Kinect SDK 2.0, FakeSensor), рендер 60 Гц с режимами «Спокойная карта», «Классика», «Контраст», мастер калибровки, сеансы с записью трёх потоков и скриншотами, профили детей в простом виде, консоль на планшете, автозапуск, наблюдатель</td><td data-h="Готово, когда">Измеренная задержка ≤ 150 мс на своём софте; пилот в клинике: 20 сеансов подряд без настройщика; специалисты подтверждают, что консоль понятна</td></tr><tr><td data-h="Этап">2. Рабочая версия</td><td data-h="Срок">6–8 недель</td><td data-h="Содержание">Задания, подписи на песке, полные профили детей, показатели и отчёты PDF, вода, PJLink (если проектор поддерживает), резервное копирование, ограничитель мерцания с автотестом, суточный тест</td><td data-h="Готово, когда">Все тесты надёжности пройдены, включая повторный замер задержки (не выше 150 мс); клиника работает месяц без выезда</td></tr><tr><td data-h="Этап">3. Продукт</td><td data-h="Срок">3–4 месяца</td><td data-h="Содержание">Будущие аналоги датчика (Orbbec / RealSense) через общий интерфейс, образ системы и мастер первого запуска, лицензирование, положение «стол» как опция комплекта, документация, обучение, удалённая поддержка, вторая площадка</td><td data-h="Готово, когда">Вторая установка развёрнута по инструкции за день без разработчика</td></tr></tbody></table></div>
+<h2 id="этап-0-подробнее"><a class="anchor" href="#этап-0-подробнее">Этап 0 подробнее</a></h2>
+<p>Цель недели — убедиться, что связка «Kinect v1 + проектор среднего сегмента + крепление к стене» даёт нужное качество и отклик до того, как писать свой код. Пошагово — <a href="software-plan.html"><code>software-plan.md</code></a>, разделы 2–4 и 7.</p>
+<ol>
+<li>Датчик и проектор на расчётных местах (<a href="wall-placement.html"><code>wall-placement.md</code></a>). На неделю допустима временная стойка или штатив, но высоты и положение над ящиком — штатные, иначе замер ничего не скажет о будущей установке.</li>
+<li>Magic Sand и драйвер Kinect v1 на имеющемся ПК.</li>
+<li>Калибровка по мастеру; проверка, что горизонтали на ровном песке спокойные и рука над песком не «красит» карту.</li>
+<li>Замер задержки: телефон 240 к/с, рука резко опускается на песок, считаем кадры от начала движения до перекраски (1 кадр = 4,2 мс), пять повторов, медиана.</li>
+<li>Запись результатов: модель датчика, модель проектора и его настройки, высоты, задержка, замечания. Это входные данные для этапа 1.</li>
+</ol>
+<p>Критерий перехода к этапу 1: задержка ≤ 180 мс (в своём софте доведём до ≤ 150), карта устойчива, ящик накрыт картинкой. При задержке 180–250 мс — сначала ищем причину (хаб или удлинитель на USB, трапеция или не игровой режим в проекторе, сильное сглаживание в настройках), потом пробуем Kinect v2. Kinect v2 поднимает датчик на 1,45 м от пола, требует USB 3.0 на контроллере Intel или Renesas и свой адаптер; крепление то же.</p>
+<p>Тесты перед сдачей каждого этапа — раздел 5 в <a href="architecture.html"><code>architecture.md</code></a>.</p>
+
+  <p class="back-bottom"><a class="btn" href="index.html">&larr; Главная</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>AR-песочница для клиники · документация проекта · собрано 22.09.2026</span>
+    <span><a href="https://github.com/amirrchik22/ar-sandbox-clinic" target="_blank" rel="noopener">Репозиторий на GitHub</a> · <a href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener">Презентация для клиента</a></span>
+  </div>
+</footer>
+</body>
+</html>

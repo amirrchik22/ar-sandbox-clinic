@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AR-песочница для клиники</title>
+<meta name="description" content="Интерактивная песочница для занятий с особенными детьми: ключевые данные проекта, разделы документации, чертежи и ближайшие шаги.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fafaf8;
+  --bg-2: #f1f0ec;
+  --text: #1d232a;
+  --muted: #5d6771;
+  --line: #e2dfd7;
+  --accent: #1a8c9c;
+  --accent-text: #ffffff;
+  --code-bg: #efeee9;
+  --font-head: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1317;
+    --bg-2: #161c22;
+    --text: #e6e9ec;
+    --muted: #9aa5ae;
+    --line: #2a323b;
+    --accent: #3fb3c3;
+    --accent-text: #0f1317;
+    --code-bg: #1a2129;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1317;
+  --bg-2: #161c22;
+  --text: #e6e9ec;
+  --muted: #9aa5ae;
+  --line: #2a323b;
+  --accent: #3fb3c3;
+  --accent-text: #0f1317;
+  --code-bg: #1a2129;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 2.2em 0 0.6em;
+}
+h1 { font-size: 2rem; margin-top: 0.4em; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; padding-top: 0.6em; border-top: 1px solid var(--line); }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
+p { margin: 0 0 1em; }
+ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
+li { margin: 0.25em 0; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+strong { font-weight: 600; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: var(--code-bg);
+  padding: 0.9em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0 0 1.2em;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+.table-wrap { overflow-x: auto; margin: 0 0 1.4em; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: 0.5em 0.7em; border-bottom: 1px solid var(--line); }
+th { font-family: var(--font-head); font-weight: 700; font-size: 0.85rem; color: var(--muted); border-bottom: 2px solid var(--line); white-space: nowrap; }
+figure { margin: 1.4em 0; }
+figure img { display: block; width: 100%; max-width: 100%; height: auto; background: #fff; border-radius: 6px; border: 1px solid var(--line); }
+figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5em; }
+img { max-width: 100%; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: 20px; }
+
+.site-header { border-bottom: 1px solid var(--line); background: var(--bg); }
+.site-header .wrap { padding-block: 14px 10px; }
+.brand { font-family: var(--font-head); font-weight: 800; font-size: 1.05rem; color: var(--text); display: inline-block; margin-bottom: 8px; }
+.brand:hover { text-decoration: none; color: var(--accent); }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.9rem; }
+.nav a { color: var(--muted); white-space: nowrap; }
+.nav a:hover { color: var(--accent); text-decoration: none; }
+.nav a.active { color: var(--text); font-weight: 600; }
+.nav a.ext::after { content: " \2197"; font-size: 0.8em; }
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.35em 0.9em;
+  border-radius: 6px;
+}
+.btn:hover { background: var(--accent); color: var(--accent-text); text-decoration: none; }
+.btn.primary { background: var(--accent); color: var(--accent-text); }
+.btn.primary:hover { opacity: 0.9; }
+
+main.wrap { padding-block: 24px 40px; }
+
+.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+.site-footer .wrap { padding-block: 18px 28px; display: flex; flex-wrap: wrap; gap: 6px 20px; justify-content: space-between; }
+.site-footer a { color: var(--muted); }
+.site-footer a:hover { color: var(--accent); }
+
+/* Главная */
+.hero { padding-block: 28px 8px; }
+.hero h1 { font-size: 2.4rem; margin: 0 0 0.35em; }
+.hero .lead { font-size: 1.15rem; color: var(--muted); max-width: 40em; margin-bottom: 1.2em; }
+.hero .status { display: inline-block; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.15em 0.8em; margin-bottom: 1.4em; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.kv { display: grid; grid-template-columns: minmax(9em, 14em) 1fr; gap: 0.55em 1.2em; margin: 0 0 1em; font-size: 0.97rem; }
+.kv dt { color: var(--muted); font-weight: 500; }
+.kv dd { margin: 0; }
+.kv .num { font-family: var(--font-mono); font-size: 0.92em; }
+.kv .note { color: var(--muted); }
+@media (max-width: 560px) {
+  .kv { grid-template-columns: 1fr; gap: 0.15em 0; }
+  .kv dt { margin-top: 0.7em; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
+}
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 0 0 1em; padding: 0; list-style: none; }
+.cards li { margin: 0; }
+.cards a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: var(--bg); }
+.cards a:hover { border-color: var(--accent); text-decoration: none; }
+.cards .t { font-family: var(--font-head); font-weight: 700; color: var(--accent); display: block; margin-bottom: 0.3em; }
+.cards .d { font-size: 0.9rem; color: var(--muted); display: block; line-height: 1.45; }
+
+.figs { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.figs figure { margin: 0; }
+
+.steps { counter-reset: step; list-style: none; padding: 0; margin: 0 0 1em; }
+.steps li { position: relative; padding-left: 2.6em; margin: 0 0 1em; }
+.steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 0.1em; width: 1.8em; height: 1.8em; border-radius: 50%; background: var(--accent); color: var(--accent-text); font-family: var(--font-mono); font-weight: 500; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+.steps .t { font-weight: 600; display: block; }
+.steps .d { font-size: 0.95rem; color: var(--muted); }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .hero h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.3rem; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">AR-песочница для клиники</a>
+    <nav class="nav" aria-label="Разделы"><a href="index.html" class="active">Главная</a><a href="wall-placement.html">Размещение у стены</a><a href="wall-layout-3d.html">3D-проверка</a><a href="hardware.html">Железо</a><a href="mounting.html">Крепление</a><a href="pipeline.html">Цикл и руки</a><a href="architecture.html">Архитектура ПО</a><a href="software-plan.html">План ПО</a><a href="roadmap.html">План работ</a><a href="https://amirrchik22.github.io/ar-sandbox/" class="ext" target="_blank" rel="noopener">Презентация для клиента</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>AR-песочница для клиники</h1>
+    <p class="lead">Ящик с песком, над ним датчик глубины и проектор: ребёнок лепит рельеф, а на песок ложится цветная карта с горизонталями. Софт ведёт сеансы, пишет видео и карту высот и строит отчёт специалисту.</p>
+    <span class="status">Статус: проектирование и скелет кода, рабочей версии нет</span>
+    <div class="actions">
+      <a class="btn primary" href="software-plan.html">План ПО: с чего начать</a>
+      <a class="btn" href="wall-placement.html">Размещение у стены</a>
+      <a class="btn" href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener">Презентация для клиента</a>
+    </div>
+  </section>
+
+  <h2 id="data">Ключевые данные</h2>
+  <p>Решения заказчика от 22.09.2026. Все документы на сайте опираются на эти числа.</p>
+  <dl class="kv">
+    <dt>Ящик</dt>
+    <dd>Размер ещё выбираем. Расчёты даны для <span class="num">1000 × 750 мм</span> внутри, рекомендация — <span class="num">1200 × 600 мм</span>: ширину задаёт картинка проектора (<span class="num">1,2 м</span>), глубину — то, докуда ребёнок дотягивается. Все варианты от 800 × 500 до 1400 × 800 — в разделе <a href="wall-placement.html#7-размер-песочницы-какие-варианты-даёт-наше-оборудование">«Размещение у стены»</a>. Фанера <span class="num">18 мм</span>, борт <span class="num">250 мм</span>. Стоит на полу вплотную к стене (зазор <span class="num">20 мм</span> под плинтус), длинной стороной вдоль стены.</dd>
+
+    <dt>Песок</dt>
+    <dd>Поверхность <span class="num">150 мм</span> от пола, слой <span class="num">130 мм</span>. Центр ящика <span class="num">X = 413 мм</span> от стены (для глубины 600 — <span class="num">338</span>).</dd>
+
+    <dt>Датчик, базовый</dt>
+    <dd>Kinect v1 (Xbox 360): <span class="num">640 × 480</span>, поле <span class="num">57° × 43°</span>, USB 2.0 + блок 12 В. Над центром ящика, <span class="num">1,20 м</span> над песком (<span class="num">1,35 м</span> от пола). Точка на песке 2 мм, шум по высоте около 3 мм.</dd>
+
+    <dt>Датчик, запасной</dt>
+    <dd>Kinect v2 (Xbox One): <span class="num">512 × 424</span>, поле <span class="num">70° × 60°</span>, USB 3.0 на контроллере Intel или Renesas. Та же консоль, <span class="num">1,30 м</span> над песком (<span class="num">1,45 м</span> от пола). <span class="note">Берём, если v1 не даст нужного качества или отклика.</span></dd>
+
+    <dt>Проектор</dt>
+    <dd>Средний сегмент: 3LCD или DLP, XGA <span class="num">1024 × 768</span> или WXGA <span class="num">1280 × 800</span>, <span class="num">3300–4000 лм</span>, обычный объектив (отношение <span class="num">1,3–1,6</span>, зум), ручной фокус, HDMI. В паспорте разрешена установка объективом вниз (иначе зеркало 45°). Игровой режим, автотрапеция и интерполяция кадров выключены.</dd>
+
+    <dt>Высоты</dt>
+    <dd>Объектив проектора <span class="num">1,95 м</span> от пола, <span class="num">80 мм</span> от стены, наклон к стене <span class="num">2,5°</span>; картинка <span class="num">1,2 × 0,9 м</span>, на песке <span class="num">0…882 мм</span> от стены. Датчик v1 — <span class="num">1,35 м</span>, v2 — <span class="num">1,45 м</span> от пола.</dd>
+
+    <dt>Крепление</dt>
+    <dd>Только к стене. Стальная рейка <span class="num">40 × 40</span> на трёх анкерах M8 (низ <span class="num">1,30 м</span>, верх <span class="num">2,30 м</span>) на <span class="num">Y = +300 мм</span> от центра ящика; Г-образная консоль выносит датчик над центром, не пересекая луч проектора. Проектор — на универсальном кронштейне, своя пластина по центру ящика, страховочный тросик.</dd>
+
+    <dt>Потолок</dt>
+    <dd>Натяжной, не ниже <span class="num">2,35 м</span> (верх проектора 2,28 м). К потолку ничего не крепим и ничего рядом не греем. Ниже 2,35 м — проектор на 1,85 м, объектив с отношением 1,4.</dd>
+
+    <dt>Стена</dt>
+    <dd>Бетон или кирпич. Гипсокартон — только в стойки каркаса или на сквозных шпильках; иначе напольная стойка 2,0 м без сверления.</dd>
+
+    <dt>Кабели</dt>
+    <dd>Канал <span class="num">40 × 25</span> по стене рядом с рейкой, <span class="num">25 × 16</span> вдоль плинтуса к тумбе с ПК сбоку от ящика. Ни одного кабеля ниже <span class="num">1,3 м</span> в зоне детей.</dd>
+
+    <dt>Задержка</dt>
+    <dd>Цель <span class="num">≤ 150 мс</span> от движения руки до перекраски (расчётный бюджет 120–180 мс; на Magic Sand на первой неделе допустимо до 180). Проверка: телефон 240 к/с, пять замеров, медиана.</dd>
+
+    <dt>Программа</dt>
+    <dd>Этап 0 — Magic Sand (бесплатно, Windows, без кода) для проверки железа. Дальше — собственный софт на Python, установка на Ubuntu 24.04 в режиме киоска.</dd>
+
+    <dt>Правила</dt>
+    <dd>Цен и имён детей в документах нет. Никаких заявлений о лечении: оборудование и ПО для развивающих и коррекционных занятий под контролем специалиста.</dd>
+  </dl>
+
+  <h2 id="sections">Разделы</h2>
+  <ul class="cards">
+    <li><a href="wall-placement.html"><span class="t">Размещение у стены</span><span class="d">Расчёт расстояний: ящик, датчик, проектор, узел крепления, кабели, чертежи.</span></a></li>
+    <li><a href="wall-layout-3d.html"><span class="t">3D-проверка</span><span class="d">Интерактивная модель: ребёнок, зона досягаемости, луч проектора, тени.</span></a></li>
+    <li><a href="hardware.html"><span class="t">Железо</span><span class="d">Комплектация и совместимость: датчики v1 и v2, проектор, компьютер, ящик, лицензии.</span></a></li>
+    <li><a href="mounting.html"><span class="t">Крепление</span><span class="d">Рейка на стене, Г-образная консоль, пластина проектора; напольная стойка как запас.</span></a></li>
+    <li><a href="pipeline.html"><span class="t">Цикл и руки</span><span class="d">Как работает цикл 30 раз в секунду, бюджет задержки, режимы для рук ребёнка.</span></a></li>
+    <li><a href="architecture.html"><span class="t">Архитектура ПО</span><span class="d">Полный проект системы: режимы, сеансы и запись, процессы, база данных, надёжность, право.</span></a></li>
+    <li><a href="software-plan.html"><span class="t">План ПО</span><span class="d">Понятным языком: неделя на Magic Sand, замер задержки, настройки проектора, чек-лист.</span></a></li>
+    <li><a href="roadmap.html"><span class="t">План работ</span><span class="d">Этапы 0–3, сроки и критерии готовности каждого этапа.</span></a></li>
+    <li><a href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener"><span class="t">Презентация для клиента</span><span class="d">Отдельный сайт для показа заказчику, без цен. Открывается в новой вкладке.</span></a></li>
+  </ul>
+
+  <h2 id="drawings">Чертежи</h2>
+  <p>Вид сбоку и вид сверху в масштабе. Нажмите на чертёж, чтобы открыть его отдельно.</p>
+  <div class="figs">
+    <figure>
+      <a href="img/wall-placement.svg" target="_blank" rel="noopener"><img src="img/wall-placement.svg" alt="Размещение у стены, вид сбоку" loading="lazy"></a>
+      <figcaption>Вид сбоку: стена слева, ящик на полу, датчик на 1,35 м, объектив проектора на 1,95 м.</figcaption>
+    </figure>
+    <figure>
+      <a href="img/wall-plan.svg" target="_blank" rel="noopener"><img src="img/wall-plan.svg" alt="Размещение у стены, вид сверху" loading="lazy"></a>
+      <figcaption>Вид сверху: рейка на Y = +300 мм, Г-образная консоль, датчик над центром ящика, проектор по центру.</figcaption>
+    </figure>
+  </div>
+
+  <h2 id="next">Что дальше</h2>
+  <ol class="steps">
+    <li><span class="t">Этап 0: неделя на Magic Sand</span><span class="d">Kinect v1 и проектор на штатных местах над ящиком, калибровка по мастеру, замер задержки телефоном 240 к/с, час непрерывной работы. Порядок — в <a href="software-plan.html">плане ПО</a>, критерии — в <a href="roadmap.html">плане работ</a>.</span></li>
+    <li><span class="t">Замерить кабинет</span><span class="d">Материал стены, высота натяжного потолка над ящиком (нужно не меньше 2,35 м), плинтус, розетки, свободная длина вдоль стены; решить глубину ящика — 750 или 600. Список — в <a href="wall-placement.html#10-что-измерить-перед-монтажом">разделе 10</a>.</span></li>
+    <li><span class="t">Выбрать проектор по паспорту</span><span class="d">Разрешена установка объективом вниз, выдув сбоку (не в потолок), игровой режим, проекционное отношение 1,3–1,6. Требования — в разделе <a href="hardware.html">«Железо»</a>.</span></li>
+  </ol>
+
+  <p><a class="btn" href="https://github.com/amirrchik22/ar-sandbox-clinic" target="_blank" rel="noopener">Репозиторий проекта на GitHub</a></p>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>AR-песочница для клиники · документация проекта · обновлено 22.09.2026</span>
+    <span><a href="https://github.com/amirrchik22/ar-sandbox-clinic" target="_blank" rel="noopener">Репозиторий на GitHub</a> · <a href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener">Презентация для клиента</a></span>
+  </div>
+</footer>
+</body>
+</html>

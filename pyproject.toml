@@ -13,6 +13,7 @@ dependencies = [
 [project.optional-dependencies]
 render = ["moderngl>=5.10", "glfw>=2.7", "Pillow>=10"]
 console = ["fastapi>=0.110", "uvicorn>=0.29", "jinja2>=3.1", "weasyprint>=62"]
+kinect1 = ["freenect"]
 kinect2 = ["pylibfreenect2"]
 orbbec = ["pyorbbecsdk"]
 realsense = ["pyrealsense2"]

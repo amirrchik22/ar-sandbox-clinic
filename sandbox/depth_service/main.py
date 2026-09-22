@@ -64,7 +64,7 @@ def run(sensor_name: str, seconds: float | None) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Сервис датчика глубины")
-    ap.add_argument("--sensor", default="fake", help="fake | kinect2 | orbbec")
+    ap.add_argument("--sensor", default="fake", help="fake | kinect1 | kinect2 | orbbec")
     ap.add_argument("--seconds", type=float, default=None, help="остановиться через N секунд")
     args = ap.parse_args()
     run(args.sensor, args.seconds)

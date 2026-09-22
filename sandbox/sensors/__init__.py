@@ -1,10 +1,19 @@
-"""Датчики глубины. Все реализации отдают один интерфейс DepthSensor."""
+"""Датчики глубины. Все реализации отдают один интерфейс DepthSensor.
+
+Порядок: fake (разработка и тесты), kinect1 (базовый датчик объекта),
+kinect2 (запасной), orbbec (будущий аналог через тот же интерфейс).
+"""
 from .base import ColorFrame, DepthFrame, DepthSensor, Intrinsics, SensorHealth
 from .fake import FakeSensor
 
 SENSORS = {"fake": FakeSensor}
 
-try:  # необязательные драйверы
+try:  # необязательные драйверы: есть модуль — датчик появляется в списке
+    from .kinect1 import Kinect1Sensor
+    SENSORS["kinect1"] = Kinect1Sensor
+except ImportError:
+    pass
+try:
     from .kinect2 import Kinect2Sensor
     SENSORS["kinect2"] = Kinect2Sensor
 except ImportError:
