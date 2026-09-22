@@ -73,7 +73,7 @@
 
 <div class="wrap">
   <h1>Песочница у стены: удобно ли ребёнку</h1>
-  <p class="lead">Ящик стоит на полу вплотную к стене. Проектор — на настенном кронштейне по центру ящика. Датчик — Kinect v1 (базовый; Kinect v2 — запасной, если v1 не даст нужного качества или отклика) — висит над центром ящика на Г-образной консоли: рейка на стене сдвинута на 30 см вдоль стены, консоль идёт от неё в комнату, а поперечина возвращается к центру, поэтому железо не попадает в луч проектора. Крепим только к стене — у заказчика натяжной потолок. Выбери датчик, возраст, позу и сторону, где сидит ребёнок: на песке появится карта, куда он достаёт, а справа — проверки по лучу проектора, датчику и зазорам. Вращай сцену мышью, приближай колёсиком.</p>
+  <p class="lead">Ящик стоит на полу вплотную к стене. Проектор — на настенном кронштейне по центру ящика. Датчик — Kinect v2 (базовый; Kinect v1 — дешёвая альтернатива) — вынесен на 450 мм от стены и стоит там при любой глубине короба: широкого поля v2 (70° × 60°, зона 1,82 × 1,50 м) хватает, чтобы видеть ящик целиком, не вставая над его центром. Консоль Г-образная: рейка на стене сдвинута на 30 см вдоль стены, продольная часть идёт от неё в комнату до отметки 450 мм, поперечина возвращается к центру на той же отметке — железо остаётся вне луча проектора. Крепим только к стене — у заказчика натяжной потолок. Выбери датчик, возраст, позу и сторону, где сидит ребёнок: на песке появится карта, куда он достаёт, а справа — проверки по лучу проектора, датчику и зазорам. Вращай сцену мышью, приближай колёсиком.</p>
 
   <div class="app">
     <div class="stage" id="stage">
@@ -84,7 +84,7 @@
         <button class="btn" data-cam="side" aria-pressed="false" type="button">Сбоку</button>
         <button class="btn" data-cam="eyes" aria-pressed="false" type="button">Глазами ребёнка</button>
       </div>
-      <div class="hint" id="hint">центр ящика 413 мм от стены<br>датчик Kinect v1 · 1,35 м от пола, Г-консоль от рейки +30 см<br>объектив 1,95 м · низ железа 1,32 м<br>натяжной потолок: к потолку не крепимся</div>
+      <div class="hint" id="hint">датчик Kinect v2 · 1,45 м от пола · вынос 450 мм от стены<br>центр ящика 413 мм от стены<br>объектив 1,95 м · низ железа 1,42 м<br>натяжной потолок: к потолку не крепимся</div>
       <div class="legend">
         <span><i style="background:var(--ok)"></i>Достаёт свободно</span>
         <span><i style="background:var(--warn)"></i>Достаёт на пределе</span>
@@ -122,8 +122,8 @@
           </select></label>
         <label style="grid-column: 1 / -1">Датчик
           <select id="sensor">
-            <option value="v1" selected>Kinect v1 (базовый)</option>
-            <option value="v2">Kinect v2 (запасной)</option>
+            <option value="v2" selected>Kinect v2 (базовый)</option>
+            <option value="v1">Kinect v1 (дешёвая альтернатива)</option>
           </select></label>
       </div>
 
@@ -139,7 +139,7 @@
       <h2>Проверки</h2>
       <ul class="checks" id="checks"></ul>
 
-      <p class="note">Фигура строится от роста: рука 40 % роста (у взрослого 44 %), корпус 30 %, голова, бёдра и голени по детским пропорциям. Зелёное — куда достаёт прямая рука при удобном наклоне корпуса, жёлтое — при сильном наклоне над бортом (до 60°, стоя до 80°), красное — не достать. Высоты по расчёту у стены: песок 0,15 м, датчик Kinect v1 — 1,35 м от пола (1,20 м над песком), запасной Kinect v2 — 1,45 м (1,30 м над песком), объектив 1,95 м, картинка до 0,88 м от стены. Консоль датчика Г-образная: рейка на стене на +30 см от центра ящика (1,30–2,30 м от пола), консоль от стены в комнату, поперечина к центру, датчик под ней над центром ящика. К потолку ничего не крепим и ничего не греем рядом с ним — потолок натяжной.</p>
+      <p class="note">Фигура строится от роста: рука 40 % роста (у взрослого 44 %), корпус 30 %, голова, бёдра и голени по детским пропорциям. Зелёное — куда достаёт прямая рука при удобном наклоне корпуса, жёлтое — при сильном наклоне над бортом (до 60°, стоя до 80°), красное — не достать. Высоты по расчёту у стены: песок 0,15 м, датчик Kinect v2 — 1,45 м от пола (1,30 м над песком, низ корпуса 1,42 м — не ниже правила «железо не ниже 1,40 м»), дешёвая альтернатива Kinect v1 — 1,35 м (1,20 м над песком), объектив 1,95 м, картинка до 0,88 м от стены. Вынос датчика v2 от стены — 450 мм, фиксированно: от глубины ящика он больше не зависит. Зазоры до луча считаются по той части света, которая падает на песок внутри ящика: картинка проектора шире ящика, и её края уходят на пол за бортом. Консоль датчика Г-образная: рейка 40 × 40 на стене на +30 см от центра ящика (1,30–2,30 м от пола, три анкера M8), продольная часть от рейки в комнату до отметки 450 мм от стены, поперечина от неё к центру на той же отметке, датчик под поперечиной, плюс страховочный тросик. Размер ящика на этот узел больше не влияет: широкое поле v2 сняло привязку к центру короба. Дешёвая альтернатива Kinect v1 висит на том же выносе, но поле у неё уже (57° × 43°), поэтому запаса вдоль стены почти нет — переключите датчик в списке и посмотрите на проверки. К потолку ничего не крепим и ничего не греем рядом с ним — потолок натяжной.</p>
     </aside>
   </div>
 </div>
@@ -153,15 +153,19 @@
   // ---------- геометрия у стены (метры). x — от стены, y — вверх, z — вдоль стены, 0 в центре ящика
   // датчики: y — высота над полом, hfov — угол вдоль стены (длинная ось датчика), vfov — угол от стены в комнату; w/h/l — габариты корпуса
   var SENSORS = {
-    v1: { name: "Kinect v1", y: 1.35, hfov: 57, vfov: 43, px: [640, 480], w: 0.064, h: 0.064, l: 0.280 },
-    v2: { name: "Kinect v2", y: 1.45, hfov: 70, vfov: 60, px: [512, 424], w: 0.066, h: 0.067, l: 0.249 }
+    v2: { name: "Kinect v2", y: 1.45, hfov: 70, vfov: 60, px: [512, 424], w: 0.066, h: 0.067, l: 0.249, noise: 2, range: "0,5–4,5 м" },
+    v1: { name: "Kinect v1", y: 1.35, hfov: 57, vfov: 43, px: [640, 480], w: 0.064, h: 0.064, l: 0.280, noise: 3, range: "0,8–4 м" }
   };
-  var C = { GAP: 0.02, PLY: 0.018, WALL_H: 0.25, SAND: 0.15, L: 1.0, SENS_Y: SENSORS.v1.y, LENS_X: 0.08, LENS_Y: 1.95, IMG_FAR: 0.882, IMG_HALF: 0.6, ARM_Z: 0.30 };
+  var C = { GAP: 0.02, PLY: 0.018, WALL_H: 0.25, SAND: 0.15, L: 1.0, SENS_Y: SENSORS.v2.y, SENS_X: 0.45, LENS_X: 0.08, LENS_Y: 1.95, IMG_FAR: 0.882, IMG_HALF: 0.6, ARM_Z: 0.30 };
   var AGES = { "3": { h: 0.95, reach: 0.45, name: "3 года" }, "5": { h: 1.10, reach: 0.52, name: "5 лет" }, "8": { h: 1.28, reach: 0.60, name: "8 лет" }, adult: { h: 1.70, reach: 0.75, name: "взрослый" } };
-  var S = { depth: 0.75, age: "5", pose: "squat", side: "front", sensor: "v1", cam: "overview" };
+  var S = { depth: 0.75, age: "5", pose: "squat", side: "front", sensor: "v2", cam: "overview" };
   function outD() { return S.depth + 2 * C.PLY; }
   function xc() { return C.GAP + outD() / 2; }
   function sensor() { return SENSORS[S.sensor]; }
+  // Вынос датчика от стены. У v2 поле широкое (70° × 60°, зона 1,82 × 1,50 м): он видит короб целиком
+  // с фиксированных 450 мм, центрировать его над ящиком не нужно — узел крепления не зависит от размера короба.
+  // Вынос 450 мм подходит обоим датчикам: у v1 поле уже (57° × 43°), запас вдоль стены меньше.
+  function sensX() { return C.SENS_X; }   // вынос 450 мм от стены — одинаково для обоих датчиков
   function armY() { return C.SENS_Y + 0.05; }                 // ось консоли и поперечины: на 5 см выше центра датчика
   function hwBottom() { return C.SENS_Y - sensor().h / 2; }   // самое низкое железо над ящиком — низ датчика
   function fmt(v, d) { return v.toFixed(d).replace(".", ","); }
@@ -221,11 +225,11 @@
   var sensorM;
   function buildArm() {
     while (armG.children.length) armG.remove(armG.children[0]);
-    var sd = sensor(), ay = armY(), reach = xc() + 0.04, span = C.ARM_Z + 0.02;
-    box(reach, 0.04, 0.04, reach / 2, ay, C.ARM_Z, matSteel, armG);                 // консоль: от рейки в комнату вдоль x при z = 0,30
-    box(0.04, 0.04, span, xc(), ay, C.ARM_Z - span / 2, matSteel, armG);            // поперечина: вдоль стены от z = 0,30 к центру (до z = -0,02)
-    sensorM = box(sd.w, sd.h, sd.l, xc(), C.SENS_Y, 0, matSensor, armG);           // датчик под поперечиной, над центром ящика (z = 0)
-    var eye = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 16), new THREE.MeshLambertMaterial({ color: 0x0b2b31 })); eye.position.set(xc(), C.SENS_Y - sd.h / 2 - 0.002, 0.02); armG.add(eye);
+    var sd = sensor(), ay = armY(), sx = sensX(), reach = sx + 0.04, span = C.ARM_Z + 0.02;
+    box(reach, 0.04, 0.04, reach / 2, ay, C.ARM_Z, matSteel, armG);                 // продольная часть: от рейки в комнату вдоль x при z = 0,30
+    box(0.04, 0.04, span, sx, ay, C.ARM_Z - span / 2, matSteel, armG);              // поперечина: вдоль стены от z = 0,30 к центру (до z = -0,02) на отметке sx
+    sensorM = box(sd.w, sd.h, sd.l, sx, C.SENS_Y, 0, matSensor, armG);             // датчик под поперечиной на выносе sx от стены (z = 0)
+    var eye = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 16), new THREE.MeshLambertMaterial({ color: 0x0b2b31 })); eye.position.set(sx, C.SENS_Y - sd.h / 2 - 0.002, 0.02); armG.add(eye);
   }
 
   // ---------- кабель-канал и тумба
@@ -304,10 +308,11 @@
   var fov = null;
   function buildFov() {
     if (fov) scene.remove(fov);
-    var sd = sensor(), dist = C.SENS_Y - C.SAND, y = C.SAND;
+    var sd = sensor(), sx = sensX(), dist = C.SENS_Y - C.SAND, y = C.SAND;
     var hz = dist * Math.tan(THREE.MathUtils.degToRad(sd.hfov / 2)), hx = dist * Math.tan(THREE.MathUtils.degToRad(sd.vfov / 2));
-    var x0 = Math.max(0.002, xc() - hx), x1 = xc() + hx, z0 = -hz, z1 = hz;
-    fov = pyramid(new THREE.Vector3(xc(), C.SENS_Y - sd.h / 2, 0), [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]], 0x37b7c8);
+    // конус строим от оси объектива датчика (C.SENS_Y), а не от низа корпуса; у стены обрезаем — дальше стена
+    var x0 = Math.max(0.002, sx - hx), x1 = sx + hx, z0 = -hz, z1 = hz;
+    fov = pyramid(new THREE.Vector3(sx, C.SENS_Y, 0), [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]], 0x37b7c8);
     fov.visible = document.getElementById("tFov").checked;
   }
   var spot = new THREE.SpotLight(0xffe2b8, 1.5, 4, 0.56, 0.5, 1.2);
@@ -379,31 +384,40 @@
   function pct(v) { return Math.round(v * 100); }
   function updateChecks() {
     var A = AGES[S.age], h = kidInfo.head, top = h.y + kidInfo.headR, items = [];
+    var sx = sensX(), mm = function (v) { return Math.round(v * 1000); };
     var bad = reachStats.bad, cls = bad < 0.05 ? "ok" : bad < 0.25 ? "warn" : "bad";
     items.push([cls, bad < 0.05 ? "достаёт" : bad < 0.25 ? "не везде" : "мало", "<b>Досягаемость песка.</b> Прямая рука при наклоне " + kidInfo.lean + "°: <span class=num>" + Math.round(kidInfo.Rcomf * 100) + " см</span> от борта, с наклоном над бортом до <span class=num>" + Math.round(kidInfo.Rmax * 100) + " см</span>. Свободно <span class=num>" + pct(reachStats.ok) + "%</span>, на пределе <span class=num>" + pct(reachStats.warn) + "%</span>, не достаёт <span class=num>" + pct(reachStats.bad) + "%</span>." + (reachStats.strip > 0.01 ? " Полоса у стены <span class=num>" + Math.round(reachStats.strip * 100) + " см</span> недоступна с этой стороны." : " Достаёт до самой стены.")]);
     var t = (C.LENS_Y - h.y) / (C.LENS_Y - C.SAND), bx0 = C.LENS_X + t * (0 - C.LENS_X), bx1 = C.LENS_X + t * (C.IMG_FAR - C.LENS_X), bz = t * C.IMG_HALF;
     var inBeam = h.y < C.LENS_Y && h.x - kidInfo.headR < bx1 && h.x + kidInfo.headR > bx0 && Math.abs(h.z) - kidInfo.headR < bz;
     items.push([inBeam ? "warn" : "ok", inBeam ? "тень" : "чисто", "<b>Голова и луч проектора.</b> " + (inBeam ? "Голова в луче: на песке будет тень от головы. Отодвинуться от борта на 10–15 см." : "Голова вне луча, тени только от рук. Луч на высоте головы заканчивается в <span class=num>" + Math.round(bx1 * 100) + " см</span> от стены.")]);
-    var overBox = h.x < xc() + 0.15 && Math.abs(h.z) < 0.2, hw = hwBottom(), clr = hw - top;
+    var overBox = Math.abs(h.x - sx) < 0.15 && h.z > -0.2 && h.z < C.ARM_Z + 0.05, hw = hwBottom(), clr = hw - top;
     var c3 = clr > 0.1 ? "ok" : overBox ? "bad" : "warn";
-    items.push([c3, clr > 0.1 ? "запас" : overBox ? "удар" : "внимание", "<b>Зазор до датчика и консоли.</b> Макушка на <span class=num>" + Math.round(top * 100) + " см</span>, низ железа (датчик над центром) <span class=num>" + Math.round(hw * 100) + " см</span>: " + (clr > 0.1 ? "запас " + Math.round(clr * 100) + " см." : overBox ? "голова под датчиком, столкновение." : "стоя над центром ящика заденет датчик; у борта — нет.")]);
+    items.push([c3, clr > 0.1 ? "запас" : overBox ? "удар" : "внимание", "<b>Зазор до датчика и консоли.</b> Макушка на <span class=num>" + Math.round(top * 100) + " см</span>, низ железа (датчик в <span class=num>" + mm(sx) + " мм</span> от стены) <span class=num>" + Math.round(hw * 100) + " см</span>: " + (clr > 0.1 ? "запас " + Math.round(clr * 100) + " см." : overBox ? "голова под датчиком, столкновение." : "стоя прямо под датчиком заденет его; у борта — нет.")]);
     var sd = sensor(), tanH = Math.tan(THREE.MathUtils.degToRad(sd.hfov / 2)), tanV = Math.tan(THREE.MathUtils.degToRad(sd.vfov / 2));
-    var ty = (C.SENS_Y - h.y), inFov = ty > 0 && Math.abs(h.x - xc()) < ty * tanV + kidInfo.headR && Math.abs(h.z) < ty * tanH + kidInfo.headR;
-    // луч проектора на заданной высоте: t — доля пути от объектива до песка; z — полуширина вдоль стены, x — дальний край от стены
-    var beamAt = function (y) { var t = (C.LENS_Y - y) / (C.LENS_Y - C.SAND); return { z: t * C.IMG_HALF, x: C.LENS_X + t * (C.IMG_FAR - C.LENS_X) }; };
-    var ay = armY(), bA = beamAt(ay), bS = beamAt(hw);
-    var armGap = (C.ARM_Z - 0.02) - bA.z, crossGap = (xc() - 0.02) - bA.x, sensGap = (xc() - sd.w / 2) - bS.x;
-    var cArm = (armGap > 0.05 && crossGap > 0.05 && sensGap > 0.01) ? "ok" : (armGap > 0 && crossGap > 0 && sensGap > 0) ? "warn" : "bad";
-    var mm = function (v) { return Math.round(v * 1000); };
-    items.push([cArm, cArm === "ok" ? "без тени" : cArm === "warn" ? "впритык" : "тень", "<b>Консоль датчика и луч проектора.</b> Консоль Г-образная: рейка на стене сдвинута на <span class=num>" + Math.round(C.ARM_Z * 100) + " см</span> вдоль стены, поперечина возвращается к центру. Луч на высоте консоли (<span class=num>" + fmt(ay, 2) + " м</span>) занимает ±<span class=num>" + mm(bA.z) + " мм</span> от центра и доходит до <span class=num>" + mm(bA.x) + " мм</span> от стены. Зазор до консоли вдоль стены <span class=num>" + mm(armGap) + " мм</span>, до поперечины от стены <span class=num>" + mm(crossGap) + " мм</span>, до датчика (на высоте его низа) <span class=num>" + mm(sensGap) + " мм</span>. " + (cArm === "ok" ? "Железо луч не режет." : cArm === "warn" ? "Железо на самом краю луча — проверить на месте." : "Железо попадает в луч: на песке будет полоса тени.")]);
-    var seeZ = 2 * (C.SENS_Y - C.SAND) * tanH, seeX = 2 * (C.SENS_Y - C.SAND) * tanV, pxmm = seeZ / sd.px[0] * 1000, wallY = C.SENS_Y - xc() / tanV;
-    items.push(["ok", inFov ? "в кадре" : "вне", "<b>Датчик " + sd.name + ".</b> Над центром ящика, <span class=num>" + fmt(C.SENS_Y - C.SAND, 2) + " м</span> над песком: видит <span class=num>" + fmt(seeZ, 2) + " × " + fmt(seeX, 2) + " м</span>, <span class=num>" + fmt(pxmm, 1) + " мм</span> на пиксель. " + (inFov ? "Голова попадает в кадр — это норма: всё вне ящика вырезается маской, руки над песком отсекает фильтр." : "Голова вне кадра. Руки над песком отсекает фильтр.") + (wallY > C.PLY + C.WALL_H ? " Стена видна в кадре ниже <span class=num>" + fmt(wallY, 2) + " м</span> от пола — тоже вырезается маской." : "")]);
+    var ty = (C.SENS_Y - h.y), inFov = ty > 0 && Math.abs(h.x - sx) < ty * tanV + kidInfo.headR && Math.abs(h.z) < ty * tanH + kidInfo.headR;
+    // Луч проектора на заданной высоте: t — доля пути от объектива до песка; z — полуширина вдоль стены,
+    // near/far — ближний и дальний края по глубине. Считаем по всей картинке 1,2 × 0,9 м — это строгая граница света.
+    var beamAt = function (y) { var t = (C.LENS_Y - y) / (C.LENS_Y - C.SAND); return { z: t * C.IMG_HALF, near: C.LENS_X * (1 - t), far: C.LENS_X + t * (C.IMG_FAR - C.LENS_X) }; };
+    var ay = armY(), bA = beamAt(ay), bS = beamAt(C.SENS_Y);
+    var armGap = (C.ARM_Z - 0.02) - bA.z;        // продольная часть консоли (Y = +300 мм) против полуширины луча вдоль стены
+    var crossGap = (sx - 0.02) - bA.far;         // поперечина: её грань со стороны стены против дальнего края луча
+    var sensGap = (sx - sd.w / 2) - bS.far;      // передняя грань корпуса датчика на высоте его оси
+    var cArm = (armGap > 0.05 && crossGap > 0.05 && sensGap > 0.05) ? "ok" : (armGap > 0 && crossGap > 0 && sensGap > 0) ? "warn" : "bad";
+    items.push([cArm, cArm === "ok" ? "без тени" : cArm === "warn" ? "впритык" : "тень", "<b>Консоль датчика и луч проектора.</b> Рейка на стене сдвинута на <span class=num>" + Math.round(C.ARM_Z * 100) + " см</span> вдоль стены, продольная часть идёт в комнату до отметки <span class=num>" + mm(sx) + " мм</span>, поперечина возвращается к центру на той же отметке. Луч на высоте поперечины (<span class=num>" + fmt(ay, 2) + " м</span>) занимает <span class=num>" + mm(bA.near) + "…" + mm(bA.far) + " мм</span> от стены и ±<span class=num>" + mm(bA.z) + " мм</span> вдоль стены; на высоте оси датчика (<span class=num>" + fmt(C.SENS_Y, 2) + " м</span>) — <span class=num>" + mm(bS.near) + "…" + mm(bS.far) + " мм</span>. Запас: продольная часть <span class=num>" + mm(armGap) + " мм</span>, поперечина <span class=num>" + mm(crossGap) + " мм</span>, передняя грань датчика <span class=num>" + mm(sensGap) + " мм</span>. " + (cArm === "ok" ? "Железо луч не режет." : cArm === "warn" ? "Железо на самом краю луча — проверить на месте." : "Железо попадает в луч: на песке будет полоса тени.") + (S.sensor === "v1" ? " Если бы датчик вешали над центром ящика, как требовало узкое поле v1, при глубине " + Math.round(S.depth * 1000) + " мм он пришёлся бы на <span class=num>" + mm(xc()) + " мм</span> от стены — и запаса до луча уже не было бы." : "")]);
+    var dist = C.SENS_Y - C.SAND, seeZ = 2 * dist * tanH, seeX = 2 * dist * tanV, pxmm = seeZ / sd.px[0] * 1000, wallY = C.SENS_Y - sx / tanV;
+    // охват по глубине: от covNear (минус — значит кадр уходит за стену) до covFar от стены; ящик считаем от борта до борта
+    var covNear = sx - seeX / 2, covFar = sx + seeX / 2, covHalf = seeZ / 2;
+    var boxSpan = function (d) { return [C.GAP, C.GAP + d + 2 * C.PLY]; };
+    var fits = function (d) { var s = boxSpan(d); return covNear <= s[0] + 0.001 && covFar >= s[1] - 0.001 && covHalf >= C.L / 2 + C.PLY - 0.001; };
+    var s6 = boxSpan(0.6), s75 = boxSpan(0.75), fit6 = fits(0.6), fit75 = fits(0.75), fitNow = fits(S.depth);
+    var mm10 = function (v) { return Math.round(v * 100) * 10; };   // границы зоны округляем до сантиметра: угол датчика паспортный, точнее смысла нет
+    items.push([fitNow ? "ok" : "bad", fitNow ? "в кадре" : "мало", "<b>Датчик " + sd.name + ".</b> " + "Ось на <span class=num>" + mm(sx) + " мм</span> от стены — фиксированно, от глубины ящика не зависит. " + "<span class=num>" + fmt(dist, 2) + " м</span> над песком, зона <span class=num>" + fmt(seeZ, 2) + " × " + fmt(seeX, 2) + " м</span>: вдоль стены ±<span class=num>" + mm10(covHalf) + " мм</span>, по глубине от <span class=num>" + mm10(covNear) + " мм</span>" + (covNear < 0 ? " (за стеной, в кадр попадает стена)" : "") + " до <span class=num>" + mm10(covFar) + " мм</span> от стены. " + (S.sensor === "v2" ? "Ящик глубиной 600 занимает <span class=num>" + mm(s6[0]) + "…" + mm(s6[1]) + " мм</span>, глубиной 750 — <span class=num>" + mm(s75[0]) + "…" + mm(s75[1]) + " мм</span> (песок — от <span class=num>38 мм</span>): " + (fit6 && fit75 ? "обе глубины целиком в кадре." : fit6 || fit75 ? "целиком в кадр попадает только глубина " + (fit6 ? "600" : "750") + " мм." : "целиком не попадает ни одна.") : "Ящик глубиной " + Math.round(S.depth * 1000) + " мм занимает <span class=num>" + mm(boxSpan(S.depth)[0]) + "…" + mm(boxSpan(S.depth)[1]) + " мм</span> (песок — от <span class=num>38 мм</span>): " + (fitNow ? "целиком в кадре, но запас у v1 небольшой." : "целиком в кадр не помещается: поле v1 уже.")) + " Разрешение <span class=num>" + fmt(pxmm, 1) + " мм</span> на точку (на 1,2 м длины — <span class=num>" + Math.floor(1.2 / pxmm * 1000) + "</span> точек), шум по высоте ≈ <span class=num>" + sd.noise + " мм</span>. " + (S.sensor === "v2" ? "Широкое поле v2 сняло привязку к центру короба: узел крепления больше не зависит от размера песочницы. " : "") + (inFov ? "Голова попадает в кадр — это норма: всё вне ящика вырезается маской, руки над песком отсекает фильтр." : "Голова вне кадра. Руки над песком отсекает фильтр.") + (wallY > C.PLY + C.WALL_H ? " Стена видна в кадре ниже <span class=num>" + fmt(wallY, 2) + " м</span> от пола — тоже вырезается маской." : "")]);
     var dl = kidInfo.eyes.distanceTo(new THREE.Vector3(C.LENS_X, C.LENS_Y, 0));
     items.push([inBeam ? "warn" : "ok", inBeam ? "ярко" : "не слепит", "<b>Глаза и проектор.</b> Объектив в <span class=num>" + dl.toFixed(1) + " м</span> над стеной. " + (inBeam ? "Глаза внутри светового конуса — ярко, если поднять взгляд." : "Глаза вне светового конуса: посмотрев вверх, ребёнок увидит лампу как яркую точку, но луч в глаза не попадает.")]);
     var front = Math.floor((C.L + 2 * C.PLY) / 0.5), ends = 2;
     items.push(["ok", "до " + (front + ends), "<b>Сколько детей.</b> Спереди <span class=num>" + front + "</span>, по одному с торцов. Свободная зона вокруг ящика 0,6 м с трёх сторон: пятно на полу <span class=num>" + (C.L + 2 * C.PLY + 1.2).toFixed(1) + " × " + (outD() + 0.6).toFixed(1) + " м</span>."]);
     document.getElementById("checks").innerHTML = items.map(function (it) { return "<li>" + chip(it[0], it[1]) + "<span>" + it[2] + "</span></li>"; }).join("");
-    document.getElementById("hint").innerHTML = "центр ящика " + Math.round(xc() * 1000) + " мм от стены<br>датчик " + sd.name + " · " + fmt(C.SENS_Y, 2) + " м от пола, Г-консоль от рейки +" + Math.round(C.ARM_Z * 100) + " см<br>объектив 1,95 м · низ железа " + fmt(hw, 2) + " м<br>натяжной потолок: к потолку не крепимся<br>" + A.name + ", " + { squat: "на корточках", kneel: "на коленях", stand: "стоя" }[S.pose];
+    document.getElementById("hint").innerHTML = "датчик " + sd.name + " · " + fmt(C.SENS_Y, 2) + " м от пола · вынос " + mm(sx) + " мм от стены" + " (фиксированно)" + "<br>центр ящика " + mm(xc()) + " мм от стены · Г-консоль от рейки +" + Math.round(C.ARM_Z * 100) + " см<br>объектив 1,95 м · низ железа " + fmt(hw, 2) + " м<br>натяжной потолок: к потолку не крепимся<br>" + A.name + ", " + { squat: "на корточках", kneel: "на коленях", stand: "стоя" }[S.pose];
   }
 
   // ---------- камера

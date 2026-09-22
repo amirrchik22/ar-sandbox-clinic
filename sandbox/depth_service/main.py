@@ -1,6 +1,8 @@
 """Цикл сервиса датчика.
 
-python -m sandbox.depth_service --sensor fake
+python -m sandbox.depth_service --sensor fake     # без железа
+python -m sandbox.depth_service --sensor kinect2  # базовый датчик объекта
+
 Читает кадры, чистит шум, отсекает руки, считает высоту над дном и публикует
 карту высот. Публикация в разделяемую память — этап 1; сейчас выводит статистику.
 """
@@ -64,7 +66,8 @@ def run(sensor_name: str, seconds: float | None) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Сервис датчика глубины")
-    ap.add_argument("--sensor", default="fake", help="fake | kinect1 | kinect2 | orbbec")
+    ap.add_argument("--sensor", default="fake",
+                    help="fake (без железа) | kinect2 (базовый) | kinect1 (альтернатива) | orbbec")
     ap.add_argument("--seconds", type=float, default=None, help="остановиться через N секунд")
     args = ap.parse_args()
     run(args.sensor, args.seconds)

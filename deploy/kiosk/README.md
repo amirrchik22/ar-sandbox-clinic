@@ -6,10 +6,14 @@
    `systemctl mask sleep.target suspend.target`, `apt-mark hold` на ядро и
    драйверы, unattended-upgrades выключить.
 3. Правило udev для датчика без root: `deploy/kiosk/99-sandbox-sensors.rules`.
-4. Скопировать репозиторий в `/opt/ar-sandbox-clinic`, создать `.venv`,
+4. Базовый датчик Kinect v2 — в порт USB 3.0 материнской платы напрямую, без
+   хаба; контроллер USB 3.0 только Intel или Renesas (на AMD и дешёвых хабах
+   датчик часто не заводится). Драйвер — libfreenect2, обёртка `pylibfreenect2`.
+   Отдельный блок питания датчика (Kinect Adapter) — в тот же ИБП, что и ПК.
+5. Скопировать репозиторий в `/opt/ar-sandbox-clinic`, создать `.venv`,
    `pip install -e ".[render,console,kinect2]"`.
-5. Скопировать `deploy/systemd/*.service` в `/etc/systemd/system/`,
+6. Скопировать `deploy/systemd/*.service` в `/etc/systemd/system/`,
    `systemctl enable --now sandbox-*.service`.
-6. Второй дисплей (проектор) — режим «расширить», родное разрешение, без
+7. Второй дисплей (проектор) — режим «расширить», родное разрешение, без
    масштабирования.
-7. Ночное копирование `data/` на сетевой накопитель клиники — `rsync` по cron.
+8. Ночное копирование `data/` на сетевой накопитель клиники — `rsync` по cron.
