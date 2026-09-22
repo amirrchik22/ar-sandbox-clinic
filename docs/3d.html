@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D-модель: песочница у стены</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root {
+    --bg: #f2f0eb; --bg-2: #e9e6df; --card: #ffffff; --card-2: #f5f3ee;
+    --line: #dcd7cd; --line-strong: #c9c2b5; --text: #1d232a; --muted: #5d6771;
+    --sensor: #1a8c9c; --proj: #c77a1d; --ok: #2f9d69; --warn: #c2ad2b; --bad: #b53625;
+    --shadow: 0 10px 30px rgba(40,35,25,.16);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1317; --bg-2: #151b21; --card: #1a2129; --card-2: #202932;
+      --line: #2a3440; --line-strong: #37434f; --text: #e9eef2; --muted: #97a3ae;
+      --sensor: #37b7c8; --proj: #f0a64a; --ok: #3bb27a; --warn: #d9c74a; --bad: #c8402d;
+      --shadow: 0 12px 34px rgba(0,0,0,.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1317; --bg-2: #151b21; --card: #1a2129; --card-2: #202932;
+    --line: #2a3440; --line-strong: #37434f; --text: #e9eef2; --muted: #97a3ae;
+    --sensor: #37b7c8; --proj: #f0a64a; --ok: #3bb27a; --warn: #d9c74a; --bad: #c8402d;
+    --shadow: 0 12px 34px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; max-width: 100%; overflow: hidden; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Golos Text", system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+
+  /* ---------- сцена во весь экран ---------- */
+  #stage { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100dvh; background: var(--bg-2); }
+  #stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  #stage canvas:active { cursor: grabbing; }
+
+  /* ---------- слой поверх сцены ---------- */
+  .hud { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100dvh;
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: 10px;
+    pointer-events: none; }
+  .hud > div { min-width: 0; }
+  .bar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; }
+  .spacer { flex: 1 1 auto; min-width: 0; }
+  .mid { display: flex; justify-content: flex-end; align-items: flex-start; min-height: 0; min-width: 0; }
+  .side { display: flex; flex-direction: column; gap: 7px; width: 332px; max-width: 100%;
+    max-height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+    pointer-events: auto; scrollbar-width: thin; scrollbar-gutter: stable; }
+  .side > * { flex: none; }   /* панели не сжимаются — вместо этого колонка прокручивается */
+  .foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px; }
+
+  .glass { background: var(--card); background: color-mix(in srgb, var(--card) 88%, transparent);
+    border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+
+  .btn { pointer-events: auto; appearance: none; border: 1px solid var(--line-strong);
+    background: var(--card); background: color-mix(in srgb, var(--card) 88%, transparent);
+    color: var(--text); font: 600 .8rem "Golos Text", sans-serif; padding: .4rem .65rem;
+    border-radius: 9px; cursor: pointer; text-decoration: none; white-space: nowrap;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: var(--shadow); }
+  .btn:hover { border-color: var(--sensor); }
+  .btn[aria-pressed="true"] { background: color-mix(in srgb, var(--sensor) 24%, var(--card)); border-color: var(--sensor); }
+  .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--sensor) 50%, transparent); outline-offset: 2px; }
+  .cams { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
+  .pill { pointer-events: auto; font: 800 .82rem "Manrope", sans-serif; letter-spacing: -.01em;
+    padding: .42rem .7rem; border-radius: 9px; white-space: nowrap; }
+
+  details.glass { overflow: hidden; }
+  summary { list-style: none; cursor: pointer; padding: .5rem .7rem; display: flex; align-items: center; gap: .4rem;
+    font: 700 .78rem "Manrope", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "▾"; margin-left: auto; font-size: .9rem; line-height: 1; transition: transform .15s ease; }
+  details[open] > summary::after { transform: rotate(180deg); }
+  summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--sensor) 50%, transparent); outline-offset: -3px; }
+  .pad { padding: 0 .7rem .7rem; }
+
+  .about { font-size: .84rem; color: var(--muted); margin: 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem .55rem; }
+  .row label { font-size: .76rem; color: var(--muted); display: grid; gap: .2rem; min-width: 0; }
+  .wide { grid-column: 1 / -1; }
+  select { width: 100%; max-width: 100%; font: 500 .86rem "Golos Text", sans-serif; color: var(--text);
+    background: var(--card-2); border: 1px solid var(--line-strong); border-radius: 8px; padding: .38rem .4rem; }
+  .toggles { display: grid; gap: .3rem; font-size: .82rem; margin-top: .6rem; }
+  .toggles label { display: flex; align-items: center; gap: .45rem; cursor: pointer; }
+  .toggles input { accent-color: var(--sensor); width: 15px; height: 15px; flex: none; }
+  .sub { font: 700 .72rem "Manrope", sans-serif; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin: .7rem 0 .35rem; }
+
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .checks li { display: grid; grid-template-columns: auto 1fr; gap: .5rem; align-items: start;
+    font-size: .84rem; line-height: 1.4; min-width: 0; }
+  .checks li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+  .chip { display: inline-block; min-width: 3.3rem; text-align: center; font: 600 .64rem "JetBrains Mono", monospace;
+    letter-spacing: .05em; text-transform: uppercase; padding: .2rem .35rem; border-radius: 6px; margin-top: .12rem; color: #fff; }
+  .chip.ok { background: var(--ok); } .chip.warn { background: var(--warn); color: #2a2a12; } .chip.bad { background: var(--bad); }
+  .checks b { font-weight: 600; }
+  .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+  .note { font-size: .76rem; color: var(--muted); margin: .7rem 0 0; }
+
+  .legend { pointer-events: auto; display: flex; flex-wrap: wrap; gap: .1rem .6rem; font-size: .72rem;
+    padding: .4rem .6rem; border-radius: 10px; max-width: 100%; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: .3rem; vertical-align: -1px; }
+  .hint { pointer-events: auto; font-family: "JetBrains Mono", monospace; font-size: .68rem; color: var(--muted);
+    text-align: right; border-radius: 10px; padding: .38rem .55rem; line-height: 1.45; max-width: 100%; }
+  @media (max-width: 880px) { .hint { display: none; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="stage">
+  <canvas id="c" aria-label="3D-сцена: песочница 1200 на 800 мм у стены, ребёнок, датчик на Г-образной консоли и проектор на настенном кронштейне"></canvas>
+</div>
+
+<div class="hud">
+  <div class="bar">
+    <a class="btn" href="index.html">← К описанию</a>
+    <span class="pill glass" id="ttl">Песочница 1200 × 800</span>
+    <span class="spacer"></span>
+    <div class="cams" role="group" aria-label="Камера">
+      <button class="btn" data-cam="overview" aria-pressed="true" type="button">Обзор</button>
+      <button class="btn" data-cam="top" aria-pressed="false" type="button">Сверху</button>
+      <button class="btn" data-cam="side" aria-pressed="false" type="button">Сбоку</button>
+      <button class="btn" data-cam="eyes" aria-pressed="false" type="button">Глазами ребёнка</button>
+    </div>
+    <button class="btn" id="fs" type="button">Во весь экран</button>
+  </div>
+
+  <div class="mid">
+    <div class="side">
+      <details class="glass" id="dAbout">
+        <summary>Что здесь показано</summary>
+        <div class="pad">
+          <p class="about">Ящик 1200 × 800 мм стоит на полу у стены. Проектор сверху рисует карту, датчик Kinect читает рельеф песка. Всё железо на стене — потолок натяжной.<br>Крутите сцену мышью или пальцем, колесо и щипок — приближение.</p>
+        </div>
+      </details>
+
+      <details class="glass" id="dSet">
+        <summary>Настройки</summary>
+        <div class="pad">
+          <div class="row">
+            <label>Возраст
+              <select id="age">
+                <option value="3">3 года · 95 см</option>
+                <option value="5" selected>5 лет · 110 см</option>
+                <option value="8">8 лет · 128 см</option>
+                <option value="adult">Взрослый · 170 см</option>
+              </select></label>
+            <label>Поза
+              <select id="pose">
+                <option value="squat" selected>На корточках</option>
+                <option value="kneel">На коленях</option>
+                <option value="stand">Стоя</option>
+              </select></label>
+            <label>Сторона
+              <select id="side">
+                <option value="front" selected>Спереди</option>
+                <option value="end">С торца</option>
+              </select></label>
+            <label>Глубина
+              <select id="depth">
+                <option value="0.8" selected>800 мм</option>
+                <option value="0.75">750 мм</option>
+                <option value="0.6">600 мм</option>
+              </select></label>
+            <label class="wide">Датчик
+              <select id="sensor">
+                <option value="v2" selected>Kinect v2 (базовый)</option>
+                <option value="v1">Kinect v1 (альтернатива)</option>
+              </select></label>
+          </div>
+          <div class="sub">Показать</div>
+          <div class="toggles">
+            <label><input type="checkbox" id="tReach" checked> карту досягаемости</label>
+            <label><input type="checkbox" id="tBeam" checked> луч проектора</label>
+            <label><input type="checkbox" id="tFov" checked> поле зрения датчика</label>
+            <label><input type="checkbox" id="tLight" checked> свет и тени</label>
+            <label><input type="checkbox" id="tCables" checked> кабель-канал и тумбу</label>
+          </div>
+        </div>
+      </details>
+
+      <details class="glass" id="dChecks" open>
+        <summary>Проверки</summary>
+        <div class="pad">
+          <ul class="checks" id="checks"></ul>
+          <p class="note">Рука — 40 % роста (у взрослого 44 %), наклон корпуса до 60°. Высоты от пола: поверхность песка 0,198 м (слой 180 мм, борт 300 мм), датчик 1,45 м, объектив проектора 1,95 м.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="legend glass">
+      <span><i style="background:var(--ok)"></i>свободно</span>
+      <span><i style="background:var(--warn)"></i>на пределе</span>
+      <span><i style="background:var(--bad)"></i>не достать</span>
+      <span><i style="background:var(--sensor)"></i>датчик</span>
+      <span><i style="background:var(--proj)"></i>проектор</span>
+    </div>
+    <div class="hint glass" id="hint"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  if (typeof THREE === "undefined") return;
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- геометрия у стены (метры). x — от стены, y — вверх, z — вдоль стены, 0 в центре ящика
+  // датчики: y — высота над полом, hfov — угол вдоль стены (длинная ось датчика), vfov — угол от стены в комнату; w/h/l — габариты корпуса
+  var SENSORS = {
+    v2: { name: "Kinect v2", y: 1.45, hfov: 70, vfov: 60, px: [512, 424], w: 0.066, h: 0.067, l: 0.249, noise: 2, range: "0,5–4,5 м" },
+    v1: { name: "Kinect v1", y: 1.35, hfov: 57, vfov: 43, px: [640, 480], w: 0.064, h: 0.064, l: 0.280, noise: 3, range: "0,8–4 м" }
+  };
+  // C.L — длина ящика вдоль стены внутри, 1200 мм (снаружи 1236). Глубина по умолчанию 800 мм (снаружи 836).
+  // Слой песка 180 мм на дне 18 мм: поверхность песка 198 мм от пола (решение 23.09).
+  // Борт 300 мм над дном — над песком остаётся 120 мм свободного борта.
+  var C = { GAP: 0.02, PLY: 0.018, WALL_H: 0.30, SAND: 0.198, SAND_LAYER: 0.18, L: 1.2, SENS_Y: SENSORS.v2.y, SENS_X: 0.45, LENS_X: 0.08, LENS_Y: 1.95, IMG_FAR: 0.910, IMG_HALF: 0.62, ARM_Z: 0.30 };
+  var AGES = { "3": { h: 0.95, reach: 0.45, name: "3 года" }, "5": { h: 1.10, reach: 0.52, name: "5 лет" }, "8": { h: 1.28, reach: 0.60, name: "8 лет" }, adult: { h: 1.70, reach: 0.75, name: "взрослый" } };
+  var S = { depth: 0.8, age: "5", pose: "squat", side: "front", sensor: "v2", cam: "overview" };
+  function outD() { return S.depth + 2 * C.PLY; }
+  function xc() { return C.GAP + outD() / 2; }            // центр ящика от стены: при глубине 800 — 438 мм
+  function sensor() { return SENSORS[S.sensor]; }
+  // Вынос датчика от стены. У v2 поле широкое (70° × 60°, зона 1,82 × 1,50 м): он видит короб целиком
+  // с фиксированных 450 мм, центрировать его над ящиком не нужно — узел крепления не зависит от размера короба.
+  function sensX() { return C.SENS_X; }                       // вынос 450 мм от стены — одинаково для обоих датчиков
+  function armY() { return C.SENS_Y + 0.05; }                 // ось консоли и поперечины: на 5 см выше центра датчика
+  function hwBottom() { return C.SENS_Y - sensor().h / 2; }   // самое низкое железо над ящиком — низ датчика
+  function fmt(v, d) { return v.toFixed(d).replace(".", ","); }
+
+  // ---------- рендер
+  var canvas = document.getElementById("c"), stage = document.getElementById("stage");
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  var scene = new THREE.Scene();
+  function bgColor() { return getComputedStyle(document.documentElement).getPropertyValue("--bg-2").trim() || "#e9e6df"; }
+  scene.background = new THREE.Color(bgColor());
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { scene.background = new THREE.Color(bgColor()); });
+
+  var camera = new THREE.PerspectiveCamera(42, 16 / 10, 0.05, 40);
+  var target = new THREE.Vector3(xc(), 0.85, 0);
+  var orbit = { theta: 0.95, phi: 1.1, r: 3.6 };
+  var goal = { theta: 0.95, phi: 1.1, r: 3.6, ty: 0.85 };
+  var camZoom = 1;                                  // на узком экране отодвигаем камеру, чтобы ящик влезал целиком
+  var eyesMode = false, eyePos = new THREE.Vector3(), eyeLook = new THREE.Vector3();
+  function updateCam() {
+    if (eyesMode) { camera.fov = 70; camera.position.copy(eyePos); camera.lookAt(eyeLook); camera.updateProjectionMatrix(); return; }
+    if (camera.fov !== 42) { camera.fov = 42; camera.updateProjectionMatrix(); }
+    var r = orbit.r * camZoom;
+    camera.position.set(target.x + r * Math.sin(orbit.phi) * Math.sin(orbit.theta), target.y + r * Math.cos(orbit.phi), target.z + r * Math.sin(orbit.phi) * Math.cos(orbit.theta));
+    camera.lookAt(target);
+  }
+
+  scene.add(new THREE.HemisphereLight(0xdfe6ee, 0x3a3630, 0.7));
+  var key = new THREE.DirectionalLight(0xffffff, 0.35); key.position.set(3, 4, 2); scene.add(key);
+
+  var matWall = new THREE.MeshLambertMaterial({ color: 0xd8d3c8 });
+  var matFloor = new THREE.MeshLambertMaterial({ color: 0x8b8378 });
+  var matWood = new THREE.MeshLambertMaterial({ color: 0x8a6a45 });
+  var matSteel = new THREE.MeshLambertMaterial({ color: 0x6f7a86 });
+  var matSensor = new THREE.MeshLambertMaterial({ color: 0x1a8c9c });
+  var matProj = new THREE.MeshLambertMaterial({ color: 0xc77a1d });
+  var matKid = new THREE.MeshLambertMaterial({ color: 0x9aa5b1 });
+  var matCab = new THREE.MeshLambertMaterial({ color: 0xa79c8c });
+  var matChan = new THREE.MeshLambertMaterial({ color: 0xe8e4dc });
+
+  function box(w, h, d, x, y, z, mat, parent) { var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (parent || scene).add(m); return m; }
+
+  // стена и пол
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 4.4), matFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(1.8, 0, 0); floor.receiveShadow = true; scene.add(floor);
+  var wall = new THREE.Mesh(new THREE.PlaneGeometry(4, 2.6), matWall); wall.rotation.y = Math.PI / 2; wall.position.set(0, 1.3, 0); wall.receiveShadow = true; scene.add(wall);
+  box(0.02, 0.06, 4, 0.01, 0.03, 0, new THREE.MeshLambertMaterial({ color: 0xc9c2b5 }));   // плинтус
+  var grid = new THREE.GridHelper(4.4, 11, 0x6b645a, 0x6b645a); grid.position.set(1.8, 0.002, 0); scene.add(grid);
+
+  // ---------- рейка, консоли, датчик, проектор (положение фиксировано и от размера ящика не зависит)
+  var fixed = new THREE.Group(); scene.add(fixed);
+  box(0.04, 1.00, 0.04, 0.02, 1.80, C.ARM_Z, matSteel, fixed);             // рейка 1,30–2,30 на стене, сдвинута на 30 см вдоль стены
+  box(0.02, 0.14, 0.14, 0.01, 2.08, 0, matSteel, fixed);                    // пластина кронштейна проектора на стене
+  box(0.02, 0.04, 0.04, 0.025, 2.08, 0, matSteel, fixed);                   // короткая штанга кронштейна
+  var projG = new THREE.Group(); projG.position.set(C.LENS_X, C.LENS_Y, 0); projG.rotation.z = -THREE.MathUtils.degToRad(2.5); fixed.add(projG);
+  box(0.10, 0.25, 0.30, 0, 0.125, 0, matProj, projG);
+  var lensM = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.015, 24), new THREE.MeshLambertMaterial({ color: 0x1b1f24 })); lensM.position.set(0, -0.005, 0.06); projG.add(lensM);
+  var armG = new THREE.Group(); fixed.add(armG);
+  var sensorM;
+  function buildArm() {
+    while (armG.children.length) armG.remove(armG.children[0]);
+    var sd = sensor(), ay = armY(), sx = sensX(), reach = sx + 0.04, span = C.ARM_Z + 0.02;
+    box(reach, 0.04, 0.04, reach / 2, ay, C.ARM_Z, matSteel, armG);                 // продольная часть: от рейки в комнату вдоль x при z = 0,30
+    box(0.04, 0.04, span, sx, ay, C.ARM_Z - span / 2, matSteel, armG);              // поперечина: вдоль стены от z = 0,30 к центру (до z = -0,02) на отметке sx
+    sensorM = box(sd.w, sd.h, sd.l, sx, C.SENS_Y, 0, matSensor, armG);              // датчик под поперечиной на выносе sx от стены (z = 0)
+    var eye = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 16), new THREE.MeshLambertMaterial({ color: 0x0b2b31 })); eye.position.set(sx, C.SENS_Y - sd.h / 2 - 0.002, 0.02); armG.add(eye);
+  }
+
+  // ---------- кабель-канал и тумба
+  var cables = new THREE.Group(); scene.add(cables);
+  box(0.025, 2.25, 0.04, 0.0125, 1.175, C.ARM_Z + 0.07, matChan, cables);    // канал рядом с рейкой
+  box(0.025, 0.02, 0.70, 0.0125, 0.075, C.ARM_Z + 0.42, matChan, cables);    // канал вдоль плинтуса
+  box(0.40, 0.60, 0.40, 0.22, 0.30, 1.15, matCab, cables);                   // тумба с ПК
+  box(0.24, 0.012, 0.17, 0.22, 0.606, 1.15, new THREE.MeshLambertMaterial({ color: 0x2b2f36 }), cables);  // планшет
+
+  // ---------- ящик и песок (пересобираются при смене глубины)
+  var boxG = new THREE.Group(); scene.add(boxG);
+  var RAMP = [[0, [31, 78, 156]], [0.25, [43, 143, 201]], [0.45, [59, 178, 122]], [0.65, [217, 199, 74]], [0.82, [230, 134, 46]], [1, [200, 64, 45]]];
+  function rampColor(t) {
+    if (t <= 0) return RAMP[0][1]; if (t >= 1) return RAMP[RAMP.length - 1][1];
+    for (var i = 1; i < RAMP.length; i++) if (t <= RAMP[i][0]) { var a = RAMP[i - 1], b = RAMP[i], k = (t - a[0]) / (b[0] - a[0]); return [a[1][0] + (b[1][0] - a[1][0]) * k, a[1][1] + (b[1][1] - a[1][1]) * k, a[1][2] + (b[1][2] - a[1][2]) * k]; }
+    return RAMP[RAMP.length - 1][1];
+  }
+  function sandH(u, v) { // u,v в -0.5..0.5
+    var h = 0.11 + 0.03 * Math.sin(u * 7.5) * Math.cos(v * 9) + 0.045 * Math.exp(-((u - 0.16) * (u - 0.16) + (v + 0.08) * (v + 0.08)) / 0.03) - 0.05 * Math.exp(-((u + 0.2) * (u + 0.2) + (v - 0.06) * (v - 0.06)) / 0.022);
+    return Math.max(0.03, Math.min(0.19, h));
+  }
+  var reachMesh = null, imgLine = null;
+  function buildBox() {
+    while (boxG.children.length) boxG.remove(boxG.children[0]);
+    var d = outD(), cx = xc(), L = C.L + 2 * C.PLY, T = C.PLY, H = C.WALL_H;
+    box(d, T, L, cx, T / 2, 0, matWood, boxG);
+    box(T, H, L, C.GAP + T / 2, T + H / 2, 0, matWood, boxG);
+    box(T, H, L, C.GAP + d - T / 2, T + H / 2, 0, matWood, boxG);
+    box(d, H, T, cx, T + H / 2, L / 2 - T / 2, matWood, boxG);
+    box(d, H, T, cx, T + H / 2, -L / 2 + T / 2, matWood, boxG);
+    var g = new THREE.PlaneGeometry(S.depth, C.L, 60, 90); g.rotateX(-Math.PI / 2);
+    var pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+    for (var i = 0; i < pos.count; i++) {
+      var u = pos.getX(i) / S.depth, v = pos.getZ(i) / C.L, hh = sandH(u, v);
+      pos.setY(i, T + hh);
+      var t = (hh - 0.03) / 0.16, band = Math.floor(t * 9) / 9, c = rampColor(band);
+      col[i * 3] = c[0] / 255; col[i * 3 + 1] = c[1] / 255; col[i * 3 + 2] = c[2] / 255;
+    }
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3)); g.computeVertexNormals();
+    var sand = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true })); sand.position.set(cx, 0, 0); sand.receiveShadow = true; boxG.add(sand);
+    // контур картинки проектора на уровне песка
+    var y = C.SAND + 0.012, pts = [new THREE.Vector3(0.002, y, -C.IMG_HALF), new THREE.Vector3(C.IMG_FAR, y, -C.IMG_HALF), new THREE.Vector3(C.IMG_FAR, y, C.IMG_HALF), new THREE.Vector3(0.002, y, C.IMG_HALF), new THREE.Vector3(0.002, y, -C.IMG_HALF)];
+    imgLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0xf0a64a, transparent: true, opacity: 0.8 })); imgLine.visible = document.getElementById("tBeam").checked; boxG.add(imgLine);
+    buildReach();
+  }
+  var reachStats = { ok: 0, warn: 0, bad: 0, strip: 0 };
+  function buildReach() {
+    if (reachMesh) { boxG.remove(reachMesh); reachMesh = null; }
+    var R = kidInfo.Rmax, Rc = kidInfo.Rcomf;
+    var g = new THREE.PlaneGeometry(S.depth, C.L, 60, 90); g.rotateX(-Math.PI / 2);
+    var pos = g.attributes.position, col = new Float32Array(pos.count * 3), n = { ok: 0, warn: 0, bad: 0 };
+    var cOk = [0.18, 0.62, 0.41], cW = [0.76, 0.68, 0.17], cB = [0.71, 0.21, 0.15];
+    for (var i = 0; i < pos.count; i++) {
+      var u = pos.getX(i), v = pos.getZ(i);            // u: -d/2..d/2 (к стене = -), v вдоль стены
+      var dFront = S.depth / 2 - u, dEnd = C.L / 2 - Math.abs(v), d = Math.min(dFront, dEnd);
+      var c = d <= Rc ? (n.ok++, cOk) : d <= R ? (n.warn++, cW) : (n.bad++, cB);
+      pos.setY(i, C.PLY + sandH(u / S.depth, v / C.L) + 0.006);
+      col[i * 3] = c[0]; col[i * 3 + 1] = c[1]; col[i * 3 + 2] = c[2];
+    }
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    reachMesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.42, depthWrite: false }));
+    reachMesh.position.set(xc(), 0, 0); reachMesh.visible = document.getElementById("tReach").checked; boxG.add(reachMesh);
+    var tot = n.ok + n.warn + n.bad;
+    reachStats = { ok: n.ok / tot, warn: n.warn / tot, bad: n.bad / tot, strip: Math.max(0, S.depth - R) };
+  }
+
+  // ---------- лучи
+  function pyramid(from, corners, color) {
+    var pts = [];
+    corners.forEach(function (c) { pts.push(from.x, from.y, from.z, c[0], c[1], c[2]); });
+    for (var k = 0; k < corners.length; k++) { var a = corners[k], b = corners[(k + 1) % corners.length]; pts.push(a[0], a[1], a[2], b[0], b[1], b[2]); }
+    var g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+    var l = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.7 })); scene.add(l); return l;
+  }
+  var beam = pyramid(new THREE.Vector3(C.LENS_X, C.LENS_Y, 0), [[0.002, C.SAND, -C.IMG_HALF], [C.IMG_FAR, C.SAND, -C.IMG_HALF], [C.IMG_FAR, C.SAND, C.IMG_HALF], [0.002, C.SAND, C.IMG_HALF]], 0xf0a64a);
+  var fov = null;
+  function buildFov() {
+    if (fov) scene.remove(fov);
+    var sd = sensor(), sx = sensX(), dist = C.SENS_Y - C.SAND, y = C.SAND;
+    var hz = dist * Math.tan(THREE.MathUtils.degToRad(sd.hfov / 2)), hx = dist * Math.tan(THREE.MathUtils.degToRad(sd.vfov / 2));
+    // конус строим от оси объектива датчика (C.SENS_Y), а не от низа корпуса; у стены обрезаем — дальше стена
+    var x0 = Math.max(0.002, sx - hx), x1 = sx + hx, z0 = -hz, z1 = hz;
+    fov = pyramid(new THREE.Vector3(sx, C.SENS_Y, 0), [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]], 0x37b7c8);
+    fov.visible = document.getElementById("tFov").checked;
+  }
+  var spot = new THREE.SpotLight(0xffe2b8, 1.5, 4, 0.56, 0.5, 1.2);
+  spot.position.set(C.LENS_X, C.LENS_Y, 0); spot.target.position.set(0.45, C.SAND, 0); spot.castShadow = true;
+  spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0004; scene.add(spot); scene.add(spot.target);
+
+  // ---------- ребёнок: пропорции от роста, наклон корпуса подбирается так, чтобы прямая рука доставала до песка
+  var kid = new THREE.Group(); scene.add(kid);
+  var kidInfo = { head: new THREE.Vector3(), headR: 0.08, eyes: new THREE.Vector3(), Rcomf: 0.3, Rmax: 0.5, lean: 25, leanMax: 60 };
+  function V(x, y, z) { return new THREE.Vector3(x, y, z); }
+  function limb(a, b, r, g) { var v = new THREE.Vector3().subVectors(b, a), len = v.length(); var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 12), matKid); m.position.copy(a).addScaledVector(v, 0.5); m.quaternion.setFromUnitVectors(V(0, 1, 0), v.normalize()); m.castShadow = true; g.add(m); }
+  function ball(p, r, g) { var m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), matKid); m.position.copy(p); m.castShadow = true; g.add(m); }
+  // точки в долях роста H; x < 0 — вперёд, к ящику. Стопы у борта, ступни на 6 см позади борта
+  var POSES = {
+    squat: { ankle: [0, 0.04], knee: [-0.13, 0.26], hip: [0.05, 0.30], foot: [-0.10, 0.05], lean0: 25, leanMax: 60 },
+    kneel: { ankle: [0.245, 0.05], knee: [0, 0.05], hip: [0.02, 0.29], foot: [0.245, 0.36], lean0: 20, leanMax: 60 },
+    stand: { ankle: [0, 0.04], knee: [0, 0.27], hip: [0.02, 0.50], foot: [-0.08, 0.07], lean0: 45, leanMax: 80 }
+  };
+  var TORSO = 0.30, ARM_KID = 0.40, ARM_ADULT = 0.44, SHOULDER_HALF = 0.11, HAND_Y = C.SAND + 0.10, FEET_BACK = 0.06;
+  function shoulderAt(P, H, leanDeg) { var a = leanDeg * Math.PI / 180; return { x: P.hip[0] * H - TORSO * H * Math.sin(a), y: P.hip[1] * H + TORSO * H * Math.cos(a) }; }
+  function reachAt(P, H, Larm, leanDeg) {
+    // горизонтальный вынос кончиков пальцев за борт при прямой руке, опущенной до высоты HAND_Y
+    var sh = shoulderAt(P, H, leanDeg), drop = sh.y - 0.02 * H - HAND_Y;
+    if (drop >= Larm) return null;
+    return -sh.x + Math.sqrt(Larm * Larm - drop * drop) - FEET_BACK;
+  }
+  function buildKid() {
+    while (kid.children.length) kid.remove(kid.children[0]);
+    var A = AGES[S.age], H = A.h, P = POSES[S.pose], adult = S.age === "adult";
+    var Larm = (adult ? ARM_ADULT : ARM_KID) * H, headR = (adult ? 0.062 : 0.07) * H;
+    var leanC = null, Rc = null, Rm = 0, leanM = P.lean0;
+    for (var d = P.lean0; d <= P.leanMax; d += 2) {
+      var r = reachAt(P, H, Larm, d);
+      if (r === null) continue;
+      if (leanC === null) { leanC = d; Rc = r; }
+      if (r > Rm) { Rm = r; leanM = d; }
+    }
+    if (leanC === null) { leanC = P.leanMax; Rc = 0.05; Rm = 0.05; }
+    kidInfo.Rcomf = Math.max(0.05, Rc); kidInfo.Rmax = Math.max(kidInfo.Rcomf, Rm); kidInfo.lean = leanC; kidInfo.leanMax = leanM;
+    var g = new THREE.Group(); kid.add(g);
+    [-0.07, 0.07].forEach(function (zf) {
+      var z = zf * H;
+      limb(V(P.ankle[0] * H, P.ankle[1] * H, z), V(P.knee[0] * H, P.knee[1] * H, z), 0.035 * H, g);
+      ball(V(P.knee[0] * H, P.knee[1] * H, z), 0.045 * H, g);
+      limb(V(P.knee[0] * H, P.knee[1] * H, z), V(P.hip[0] * H, P.hip[1] * H, z), 0.045 * H, g);
+      limb(V(P.foot[0] * H, 0.03 * H, z), V(P.foot[1] * H, 0.03 * H, z), 0.03 * H, g);
+    });
+    var sh = shoulderAt(P, H, leanC), hip = V(P.hip[0] * H, P.hip[1] * H, 0), shV = V(sh.x, sh.y, 0);
+    ball(hip, 0.07 * H, g); limb(hip, shV, 0.065 * H, g);
+    var dir = new THREE.Vector3().subVectors(shV, hip).normalize(), headC = shV.clone().addScaledVector(dir, 0.05 * H + headR);
+    ball(headC, headR, g);
+    var handX = -(kidInfo.Rcomf + FEET_BACK);
+    [-1, 1].forEach(function (side) {
+      var s0 = V(sh.x, sh.y - 0.02 * H, side * SHOULDER_HALF * H), hd = V(handX, HAND_Y, side * 0.06 * H);
+      var el = new THREE.Vector3().addVectors(s0, hd).multiplyScalar(0.5); el.y -= 0.03 * H;
+      limb(s0, el, 0.025 * H, g); limb(el, hd, 0.022 * H, g); ball(hd, 0.03 * H, g);
+    });
+    if (S.side === "front") { kid.rotation.y = 0; kid.position.set(C.GAP + outD() + FEET_BACK, 0, 0); }
+    else { kid.rotation.y = -Math.PI / 2; kid.position.set(xc(), 0, C.L / 2 + C.PLY + FEET_BACK); }
+    kidInfo.head.copy(headC).applyAxisAngle(V(0, 1, 0), kid.rotation.y).add(kid.position);
+    kidInfo.headR = headR;
+    var fwd = S.side === "front" ? V(-1, 0, 0) : V(0, 0, -1);
+    kidInfo.eyes.copy(kidInfo.head).addScaledVector(fwd, headR * 0.9); kidInfo.eyes.y += 0.01;
+    eyePos.copy(kidInfo.eyes); eyeLook.set(xc(), C.SAND, 0);
+  }
+
+  // ---------- проверки
+  function chip(cls, text) { return '<span class="chip ' + cls + '">' + text + '</span>'; }
+  function pct(v) { return Math.round(v * 100); }
+  function mm(v) { return Math.round(v * 1000); }
+  function cm(v) { return Math.round(v * 100); }
+  function updateChecks() {
+    var A = AGES[S.age], h = kidInfo.head, top = h.y + kidInfo.headR, items = [];
+    var sx = sensX(), sd = sensor();
+
+    // 1. досягаемость песка
+    var bad = reachStats.bad, cls = bad < 0.05 ? "ok" : bad < 0.25 ? "warn" : "bad";
+    var strip = reachStats.strip;
+    items.push([cls, bad < 0.05 ? "достаёт" : bad < 0.25 ? "не везде" : "мало",
+      "<b>Досягаемость песка.</b> Прямая рука при наклоне " + kidInfo.lean + "°: <span class=num>" + cm(kidInfo.Rcomf) + " см</span> от борта, с сильным наклоном (" + kidInfo.leanMax + "°) — <span class=num>" + cm(kidInfo.Rmax) + " см</span>. " +
+      (strip > 0.01
+        ? "Глубина ящика <span class=num>" + mm(S.depth) + " мм</span>, поэтому с одной стороны дальние <span class=num>" + cm(strip) + " см</span> у стены рукой не взять — их берут с торцов. "
+        : "С одной стороны достаёт до самой стены. ") +
+      "Играют с трёх сторон, вместе они закрывают песок так: свободно <span class=num>" + pct(reachStats.ok) + "%</span>, на пределе <span class=num>" + pct(reachStats.warn) + "%</span>, не достать <span class=num>" + pct(reachStats.bad) + "%</span>" +
+      (bad > 0.005 ? " — это пятно у стены посередине." : ".")]);
+
+    // 2. картинка проектора против песка
+    var sandNear = C.GAP + C.PLY, sandFar = sandNear + S.depth;
+    var mFar = C.IMG_FAR - sandFar, mSide = C.IMG_HALF - C.L / 2;
+    var cImg = (mFar > 0.02 && mSide > 0.02) ? "ok" : (mFar >= 0 && mSide >= -0.001) ? "warn" : "bad";
+    items.push([cImg, cImg === "bad" ? "не накрыт" : cImg === "warn" ? "впритык" : "накрыт",
+      "<b>Картинка проектора.</b> Объектив на <span class=num>" + fmt(C.LENS_Y, 2) + " м</span> от пола и <span class=num>" + mm(C.LENS_X) + " мм</span> от стены, наклон <span class=num>2,6°</span>. На песке картинка <span class=num>1,24 × 0,93 м</span>: по глубине <span class=num>0…" + mm(C.IMG_FAR) + " мм</span> от стены, вдоль стены ±<span class=num>" + mm(C.IMG_HALF) + " мм</span>. Песок лежит <span class=num>" + mm(sandNear) + "…" + mm(sandFar) + " мм</span> от стены и ±<span class=num>" + mm(C.L / 2) + " мм</span> вдоль стены. " +
+      (mFar >= 0 ? "По глубине ящик накрыт целиком, запас у переднего борта <span class=num>" + mm(mFar) + " мм</span>. " : "По глубине не хватает <span class=num>" + mm(-mFar) + " мм</span> у переднего борта. ") +
+      (Math.abs(mSide) < 0.005 ? "Вдоль стены картинка ровно по краям песка — ширину доводят зумом проектора при настройке."
+        : mSide > 0 ? "Вдоль стены запас <span class=num>" + mm(mSide) + " мм</span> с каждого торца."
+          : "Вдоль стены не хватает <span class=num>" + mm(-mSide) + " мм</span> с каждого торца.")]);
+
+    // 3. датчик: видит ли он весь ящик
+    var tanH = Math.tan(THREE.MathUtils.degToRad(sd.hfov / 2)), tanV = Math.tan(THREE.MathUtils.degToRad(sd.vfov / 2));
+    var dist = C.SENS_Y - C.SAND, seeZ = 2 * dist * tanH, seeX = 2 * dist * tanV, pxmm = seeZ / sd.px[0] * 1000;
+    var covNear = sx - seeX / 2, covFar = sx + seeX / 2, covHalf = seeZ / 2;
+    var boxSpan = function (d) { return [C.GAP, C.GAP + d + 2 * C.PLY]; };
+    var bs = boxSpan(S.depth), boxHalf = C.L / 2 + C.PLY;
+    var fitNow = covNear <= bs[0] + 0.001 && covFar >= bs[1] - 0.001 && covHalf >= boxHalf - 0.001;
+    var mm10 = function (v) { return Math.round(v * 100) * 10; };   // границы зоны округляем до сантиметра: угол датчика паспортный, точнее смысла нет
+    var ty = (C.SENS_Y - h.y), inFov = ty > 0 && Math.abs(h.x - sx) < ty * tanV + kidInfo.headR && Math.abs(h.z) < ty * tanH + kidInfo.headR;
+    items.push([fitNow ? "ok" : "bad", fitNow ? "видит всё" : "мало",
+      "<b>Датчик " + sd.name + ".</b> Ось на <span class=num>" + mm(sx) + " мм</span> от стены — фиксированно, от размера ящика не зависит. Высота <span class=num>" + fmt(C.SENS_Y, 2) + " м</span> от пола, <span class=num>" + fmt(dist, 2) + " м</span> над песком. Зона <span class=num>" + fmt(seeZ, 2) + " × " + fmt(seeX, 2) + " м</span>: вдоль стены ±<span class=num>" + mm10(covHalf) + " мм</span>, по глубине <span class=num>" + mm10(covNear) + "…" + mm10(covFar) + " мм</span> от стены" + (covNear < 0 ? " (минус — в кадр попадает стена, её режет маска)" : "") + ". Ящик снаружи <span class=num>" + Math.round((C.L + 2 * C.PLY) * 1000) + " × " + Math.round(outD() * 1000) + " мм</span> занимает <span class=num>" + mm(bs[0]) + "…" + mm(bs[1]) + " мм</span> и ±<span class=num>" + mm(boxHalf) + " мм</span>: " +
+      (fitNow ? "виден целиком, запас <span class=num>" + mm(covFar - bs[1]) + " мм</span> по глубине и <span class=num>" + mm(covHalf - boxHalf) + " мм</span> вдоль стены." : "целиком в кадр не помещается — поле этого датчика уже.") +
+      " Разрешение <span class=num>" + fmt(pxmm, 1) + " мм</span> на точку (на <span class=num>" + fmt(C.L, 1) + " м</span> длины — <span class=num>" + Math.floor(C.L / pxmm * 1000) + "</span> точек), шум по высоте ≈ <span class=num>" + sd.noise + " мм</span>. " +
+      (inFov ? "Голова попадает в кадр — это норма: всё вне ящика вырезает маска, руки над песком отсекает фильтр." : "Голова вне кадра.")]);
+
+    // 4. консоль датчика против луча проектора
+    var beamAt = function (y) { var t = (C.LENS_Y - y) / (C.LENS_Y - C.SAND); return { z: t * C.IMG_HALF, near: C.LENS_X * (1 - t), far: C.LENS_X + t * (C.IMG_FAR - C.LENS_X) }; };
+    var ay = armY(), bA = beamAt(ay), bS = beamAt(C.SENS_Y);
+    var armGap = (C.ARM_Z - 0.02) - bA.z;        // продольная часть консоли (Y = +300 мм) против полуширины луча вдоль стены
+    var crossGap = (sx - 0.02) - bA.far;         // поперечина: её грань со стороны стены против дальнего края луча
+    var sensGap = (sx - sd.w / 2) - bS.far;      // передняя грань корпуса датчика на высоте его оси
+    var cArm = (armGap > 0.05 && crossGap > 0.05 && sensGap > 0.05) ? "ok" : (armGap > 0 && crossGap > 0 && sensGap > 0) ? "warn" : "bad";
+    items.push([cArm, cArm === "ok" ? "без тени" : cArm === "warn" ? "впритык" : "тень",
+      "<b>Консоль датчика и луч.</b> Рейка на стене сдвинута на <span class=num>" + cm(C.ARM_Z) + " см</span> вдоль стены, продольная часть идёт в комнату до отметки <span class=num>" + mm(sx) + " мм</span>, поперечина возвращается к центру на той же отметке. Запас до луча: продольная часть <span class=num>" + mm(armGap) + " мм</span>, поперечина <span class=num>" + mm(crossGap) + " мм</span>, корпус датчика <span class=num>" + mm(sensGap) + " мм</span>. " +
+      (cArm === "ok" ? "Железо луч не режет — тени на песке не будет." : cArm === "warn" ? "Железо на самом краю луча — проверить на месте." : "Железо попадает в луч: на песке будет полоса тени.")]);
+
+    // 5. зазор от головы до железа
+    var overBox = Math.abs(h.x - sx) < 0.15 && h.z > -0.2 && h.z < C.ARM_Z + 0.05, hw = hwBottom(), clr = hw - top;
+    var c5 = clr > 0.1 ? "ok" : overBox ? "bad" : "warn";
+    items.push([c5, clr > 0.1 ? "запас" : overBox ? "удар" : "внимание",
+      "<b>Зазор до датчика и консоли.</b> Макушка на <span class=num>" + cm(top) + " см</span>, низ железа (датчик в <span class=num>" + mm(sx) + " мм</span> от стены) <span class=num>" + cm(hw) + " см</span>: " +
+      (clr > 0.1 ? "запас " + cm(clr) + " см." : overBox ? "голова под датчиком, столкновение." : "стоя прямо под датчиком заденет его; у борта — нет.")]);
+
+    // 6. голова в луче
+    var t = (C.LENS_Y - h.y) / (C.LENS_Y - C.SAND), bx0 = C.LENS_X + t * (0 - C.LENS_X), bx1 = C.LENS_X + t * (C.IMG_FAR - C.LENS_X), bz = t * C.IMG_HALF;
+    var inBeam = h.y < C.LENS_Y && h.x - kidInfo.headR < bx1 && h.x + kidInfo.headR > bx0 && Math.abs(h.z) - kidInfo.headR < bz;
+    items.push([inBeam ? "warn" : "ok", inBeam ? "тень" : "чисто",
+      "<b>Голова и луч проектора.</b> " + (inBeam ? "Голова в луче: на песке будет тень от головы. Отодвинуться от борта на 10–15 см." : "Голова вне луча, тени только от рук. Луч на высоте головы заканчивается в <span class=num>" + cm(bx1) + " см</span> от стены.")]);
+
+    // 7. глаза
+    var dl = kidInfo.eyes.distanceTo(new THREE.Vector3(C.LENS_X, C.LENS_Y, 0));
+    items.push([inBeam ? "warn" : "ok", inBeam ? "ярко" : "не слепит",
+      "<b>Глаза и проектор.</b> Объектив в <span class=num>" + fmt(dl, 1) + " м</span> над стеной. " + (inBeam ? "Глаза внутри светового конуса — ярко, если поднять взгляд." : "Глаза вне светового конуса: луч в глаза не попадает.")]);
+
+    // 8. сколько детей
+    var front = Math.floor((C.L + 2 * C.PLY) / 0.5), ends = 2;
+    items.push(["ok", "до " + (front + ends),
+      "<b>Сколько детей.</b> Спереди <span class=num>" + front + "</span>, по одному с торцов. Свободная зона вокруг ящика 0,6 м с трёх сторон: пятно на полу <span class=num>" + fmt(C.L + 2 * C.PLY + 1.2, 1) + " × " + fmt(outD() + 0.6, 1) + " м</span>."]);
+
+    document.getElementById("checks").innerHTML = items.map(function (it) { return "<li>" + chip(it[0], it[1]) + "<span>" + it[2] + "</span></li>"; }).join("");
+    document.getElementById("ttl").textContent = "Песочница " + mm(C.L) + " × " + mm(S.depth);
+    document.getElementById("hint").innerHTML =
+      "ящик " + mm(C.L) + " × " + mm(S.depth) + " внутри · центр " + mm(xc()) + " мм от стены<br>" +
+      sd.name + " " + fmt(C.SENS_Y, 2) + " м · вынос " + mm(sx) + " мм · объектив 1,95 м<br>" +
+      A.name + ", " + { squat: "на корточках", kneel: "на коленях", stand: "стоя" }[S.pose] +
+      " · к натяжному потолку не крепимся";
+  }
+
+  // ---------- камера
+  var CAMS = { overview: { theta: 0.95, phi: 1.1, r: 3.6, ty: 0.85 }, top: { theta: 0.6, phi: 0.28, r: 3.4, ty: 0.5 }, side: { theta: 0.02, phi: 1.32, r: 3.5, ty: 0.95 } };
+  function setCam(name) {
+    S.cam = name; eyesMode = name === "eyes"; kid.visible = !eyesMode;
+    if (!eyesMode) { var c = CAMS[name]; goal.theta = c.theta; goal.phi = c.phi; goal.r = c.r; goal.ty = c.ty; }
+    document.querySelectorAll("[data-cam]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-cam") === name ? "true" : "false"); });
+  }
+  document.querySelectorAll("[data-cam]").forEach(function (b) { b.addEventListener("click", function () { setCam(b.getAttribute("data-cam")); }); });
+
+  var drag = false, lx = 0, ly = 0, pinch = 0;
+  function leaveEyes() { if (eyesMode) { setCam("overview"); } }
+  canvas.addEventListener("pointerdown", function (e) { drag = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); leaveEyes(); });
+  canvas.addEventListener("pointermove", function (e) { if (!drag) return; orbit.theta -= (e.clientX - lx) * 0.008; orbit.phi = Math.max(0.2, Math.min(1.5, orbit.phi - (e.clientY - ly) * 0.006)); goal.theta = orbit.theta; goal.phi = orbit.phi; lx = e.clientX; ly = e.clientY; });
+  canvas.addEventListener("pointerup", function () { drag = false; });
+  canvas.addEventListener("pointercancel", function () { drag = false; });
+  canvas.addEventListener("wheel", function (e) { e.preventDefault(); leaveEyes(); orbit.r = Math.max(1.2, Math.min(7, orbit.r * (1 + e.deltaY * 0.0012))); goal.r = orbit.r; }, { passive: false });
+  canvas.addEventListener("touchstart", function (e) { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }, { passive: true });
+  canvas.addEventListener("touchmove", function (e) { if (e.touches.length === 2 && pinch) { var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); orbit.r = Math.max(1.2, Math.min(7, orbit.r * pinch / d)); goal.r = orbit.r; pinch = d; } }, { passive: true });
+
+  // ---------- управление
+  function rebuildAll() { buildArm(); buildKid(); buildBox(); buildFov(); target.x = xc(); updateChecks(); }
+  ["age", "pose", "side", "depth", "sensor"].forEach(function (id) {
+    document.getElementById(id).addEventListener("change", function (e) {
+      S[id] = id === "depth" ? parseFloat(e.target.value) : e.target.value;
+      if (id === "sensor") C.SENS_Y = sensor().y;
+      rebuildAll();
+    });
+  });
+  document.getElementById("tReach").addEventListener("change", function (e) { if (reachMesh) reachMesh.visible = e.target.checked; });
+  document.getElementById("tBeam").addEventListener("change", function (e) { beam.visible = e.target.checked; if (imgLine) imgLine.visible = e.target.checked; });
+  document.getElementById("tFov").addEventListener("change", function (e) { if (fov) fov.visible = e.target.checked; });
+  document.getElementById("tLight").addEventListener("change", function (e) { spot.visible = e.target.checked; });
+  document.getElementById("tCables").addEventListener("change", function (e) { cables.visible = e.target.checked; });
+
+  // панели: на широком экране настройки и проверки открыты, на телефоне свёрнуты в кнопки
+  var wide = window.matchMedia("(min-width: 900px)").matches;
+  document.getElementById("dSet").open = wide;
+  document.getElementById("dChecks").open = wide;
+
+  // ---------- во весь экран
+  var fsBtn = document.getElementById("fs");
+  var canFs = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  if (!canFs) fsBtn.hidden = true;
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  function fsLabel() { fsBtn.textContent = fsEl() ? "Выйти из полного экрана" : "Во весь экран"; }
+  fsBtn.addEventListener("click", function () {
+    var root = document.documentElement;
+    if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+    else { var req = root.requestFullscreen || root.webkitRequestFullscreen; if (req) { var p = req.call(root); if (p && p.catch) p.catch(function () {}); } }
+  });
+  document.addEventListener("fullscreenchange", fsLabel);
+  document.addEventListener("webkitfullscreenchange", fsLabel);
+  fsLabel();
+
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    // узкий и высокий экран: отодвигаем камеру, чтобы ящик целиком влезал по ширине
+    camZoom = camera.aspect >= 1.5 ? 1 : Math.min(1.85, 1 + (1.5 - camera.aspect) * 0.58);
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", function () { setTimeout(resize, 200); });
+
+  rebuildAll(); resize(); setCam("overview");
+  var k = reduceMotion ? 1 : 0.1;
+  function animate() {
+    if (!drag) { orbit.theta += (goal.theta - orbit.theta) * k; orbit.phi += (goal.phi - orbit.phi) * k; orbit.r += (goal.r - orbit.r) * k; }
+    target.y += (goal.ty - target.y) * k;
+    updateCam(); renderer.render(scene, camera); requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>

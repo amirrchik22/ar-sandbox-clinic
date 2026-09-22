@@ -4,287 +4,247 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AR-песочница для клиники</title>
-<meta name="description" content="Интерактивная песочница для занятий с особенными детьми: ключевые данные проекта, разделы документации, чертежи и ближайшие шаги.">
+<meta name="description" content="Интерактивная песочница: из чего состоит, какие устройства нужны и как они соединяются.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   color-scheme: light;
-  --bg: #fafaf8;
-  --bg-2: #f1f0ec;
-  --text: #1d232a;
-  --muted: #5d6771;
-  --line: #e2dfd7;
-  --accent: #1a8c9c;
-  --accent-text: #ffffff;
-  --code-bg: #efeee9;
+  --bg: #faf9f6; --bg-2: #f1efe9; --card: #ffffff;
+  --text: #1c2228; --muted: #5c6771; --line: #e3dfd6; --line-2: #cec8bc;
+  --accent: #14808f; --accent-text: #ffffff; --warm: #c77a1d;
   --font-head: "Manrope", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Golos Text", "Segoe UI", Roboto, Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0f1317;
-    --bg-2: #161c22;
-    --text: #e6e9ec;
-    --muted: #9aa5ae;
-    --line: #2a323b;
-    --accent: #3fb3c3;
-    --accent-text: #0f1317;
-    --code-bg: #1a2129;
+    --bg: #0f1418; --bg-2: #161d23; --card: #19212800;
+    --text: #e7ebee; --muted: #9aa5ae; --line: #2a333c; --line-2: #3a4550;
+    --accent: #3ab3c2; --accent-text: #0f1418; --warm: #e39a42;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0f1317;
-  --bg-2: #161c22;
-  --text: #e6e9ec;
-  --muted: #9aa5ae;
-  --line: #2a323b;
-  --accent: #3fb3c3;
-  --accent-text: #0f1317;
-  --code-bg: #1a2129;
+  --bg: #0f1418; --bg-2: #161d23; --card: #19212800;
+  --text: #e7ebee; --muted: #9aa5ae; --line: #2a333c; --line-2: #3a4550;
+  --accent: #3ab3c2; --accent-text: #0f1418; --warm: #e39a42;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 17px;
-  line-height: 1.6;
-  font-variant-numeric: tabular-nums;
-}
-a { color: var(--accent); text-decoration: none; }
-a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
-h1, h2, h3, h4 {
-  font-family: var(--font-head);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  margin: 2.2em 0 0.6em;
-}
-h1 { font-size: 2rem; margin-top: 0.4em; letter-spacing: -0.02em; }
-h2 { font-size: 1.45rem; padding-top: 0.6em; border-top: 1px solid var(--line); }
-h3 { font-size: 1.15rem; }
-h4 { font-size: 1rem; }
-p { margin: 0 0 1em; }
-ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
-li { margin: 0.25em 0; }
-hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
-strong { font-weight: 600; }
-code {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
-  background: var(--code-bg);
-  padding: 0.1em 0.35em;
-  border-radius: 4px;
-}
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  line-height: 1.45;
-  background: var(--code-bg);
-  padding: 0.9em 1em;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin: 0 0 1.2em;
-}
-pre code { background: none; padding: 0; font-size: inherit; }
-.table-wrap { overflow-x: auto; margin: 0 0 1.4em; -webkit-overflow-scrolling: touch; }
-table { border-collapse: collapse; width: 100%; font-size: 0.93rem; line-height: 1.45; }
-th, td { text-align: left; vertical-align: top; padding: 0.5em 0.7em; border-bottom: 1px solid var(--line); }
-th { font-family: var(--font-head); font-weight: 700; font-size: 0.85rem; color: var(--muted); border-bottom: 2px solid var(--line); white-space: nowrap; }
-figure { margin: 1.4em 0; }
-figure img { display: block; width: 100%; max-width: 100%; height: auto; background: #fff; border-radius: 6px; border: 1px solid var(--line); }
-figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.5em; }
-img { max-width: 100%; }
-
-.wrap { max-width: 760px; margin: 0 auto; padding-inline: 20px; }
-
-.site-header { border-bottom: 1px solid var(--line); background: var(--bg); }
-.site-header .wrap { padding-block: 14px 10px; }
-.brand { font-family: var(--font-head); font-weight: 800; font-size: 1.05rem; color: var(--text); display: inline-block; margin-bottom: 8px; }
-.brand:hover { text-decoration: none; color: var(--accent); }
-.nav { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.9rem; }
-.nav a { color: var(--muted); white-space: nowrap; }
-.nav a:hover { color: var(--accent); text-decoration: none; }
-.nav a.active { color: var(--text); font-weight: 600; }
-.nav a.ext::after { content: " \2197"; font-size: 0.8em; }
-
-.btn {
-  display: inline-block;
-  font-family: var(--font-head);
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  padding: 0.35em 0.9em;
-  border-radius: 6px;
-}
-.btn:hover { background: var(--accent); color: var(--accent-text); text-decoration: none; }
-.btn.primary { background: var(--accent); color: var(--accent-text); }
-.btn.primary:hover { opacity: 0.9; }
-
-main.wrap { padding-block: 24px 40px; }
-
-.site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
-.site-footer .wrap { padding-block: 18px 28px; display: flex; flex-wrap: wrap; gap: 6px 20px; justify-content: space-between; }
-.site-footer a { color: var(--muted); }
-.site-footer a:hover { color: var(--accent); }
-
-/* Главная */
-.hero { padding-block: 28px 8px; }
-.hero h1 { font-size: 2.4rem; margin: 0 0 0.35em; }
-.hero .lead { font-size: 1.15rem; color: var(--muted); max-width: 40em; margin-bottom: 1.2em; }
-.hero .status { display: inline-block; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.15em 0.8em; margin-bottom: 1.4em; }
-.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-
-.kv { display: grid; grid-template-columns: minmax(9em, 14em) 1fr; gap: 0.55em 1.2em; margin: 0 0 1em; font-size: 0.97rem; }
-.kv dt { color: var(--muted); font-weight: 500; }
-.kv dd { margin: 0; }
-.kv .num { font-family: var(--font-mono); font-size: 0.92em; }
-.kv .note { color: var(--muted); }
-@media (max-width: 560px) {
-  .kv { grid-template-columns: 1fr; gap: 0.15em 0; }
-  .kv dt { margin-top: 0.7em; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
-}
-
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 0 0 1em; padding: 0; list-style: none; }
-.cards li { margin: 0; }
-.cards a { display: block; height: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: var(--bg); }
-.cards a:hover { border-color: var(--accent); text-decoration: none; }
-.cards .t { font-family: var(--font-head); font-weight: 700; color: var(--accent); display: block; margin-bottom: 0.3em; }
-.cards .d { font-size: 0.9rem; color: var(--muted); display: block; line-height: 1.45; }
-
-.figs { display: grid; grid-template-columns: 1fr; gap: 16px; }
-.figs figure { margin: 0; }
-
-.steps { counter-reset: step; list-style: none; padding: 0; margin: 0 0 1em; }
-.steps li { position: relative; padding-left: 2.6em; margin: 0 0 1em; }
-.steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 0.1em; width: 1.8em; height: 1.8em; border-radius: 50%; background: var(--accent); color: var(--accent-text); font-family: var(--font-mono); font-weight: 500; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
-.steps .t { font-weight: 600; display: block; }
-.steps .d { font-size: 0.95rem; color: var(--muted); }
-
-@media (max-width: 480px) {
-  body { font-size: 16px; }
-  .hero h1 { font-size: 1.8rem; }
-  h2 { font-size: 1.3rem; }
-}
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 20px; }
+h1 { font-family: var(--font-head); font-weight: 800; font-size: clamp(1.7rem, 4.4vw, 2.5rem); line-height: 1.12; letter-spacing: -.02em; margin: 0 0 .6rem; text-wrap: balance; }
+h2 { font-family: var(--font-head); font-weight: 700; font-size: clamp(1.15rem, 2.6vw, 1.45rem); letter-spacing: -.01em; margin: 0 0 .1rem; }
+.eyebrow { font-family: var(--font-head); font-weight: 700; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .55rem; }
+p { margin: .6rem 0; }
+.lead { font-size: 1.06rem; color: var(--muted); max-width: 62ch; }
+a { color: var(--accent); }
+header.top { border-bottom: 1px solid var(--line); background: var(--bg-2); }
+header.top .wrap { padding-block: 44px 38px; }
+section { border-bottom: 1px solid var(--line); }
+section .wrap { padding-block: 34px; }
+.btns { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; }
+.btn { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--font-head); font-weight: 700; font-size: .95rem; text-decoration: none; padding: .7rem 1.15rem; border-radius: 10px; border: 1px solid var(--line-2); color: var(--text); }
+.btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn:hover { border-color: var(--accent); }
+table { border-collapse: collapse; width: 100%; margin: .8rem 0 0; font-size: .95rem; }
+th, td { text-align: left; vertical-align: top; padding: .62em .7em .62em 0; border-bottom: 1px solid var(--line); }
+th { font-family: var(--font-head); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td:first-child { font-family: var(--font-head); font-weight: 700; padding-right: 1.2em; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .93em; }
+figure { margin: 1.1rem 0 0; }
+figure img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+figcaption { font-size: .82rem; color: var(--muted); margin-top: .5rem; }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 1rem; }
+@media (max-width: 720px) { .cols { grid-template-columns: 1fr; gap: 1.1rem; } }
+.cols h3 { font-family: var(--font-head); font-size: .95rem; margin: 0 0 .35rem; }
+.cols ul { margin: 0; padding-left: 1.05rem; color: var(--muted); font-size: .93rem; }
+.cols li { margin-bottom: .25rem; }
+ol.steps { counter-reset: s; list-style: none; margin: 1rem 0 0; padding: 0; }
+ol.steps li { position: relative; padding-left: 2.4rem; margin-bottom: 1rem; }
+ol.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: .05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 1px solid var(--line-2); display: grid; place-items: center; font-family: var(--font-mono); font-size: .82rem; color: var(--muted); }
+ol.steps b { font-family: var(--font-head); }
+.wire { width: 100%; height: auto; margin-top: 1rem; overflow-x: auto; }
+.wire svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.wirebox { overflow-x: auto; }
+.rules { font-size: .93rem; color: var(--muted); margin-top: .9rem; }
+footer { background: var(--bg-2); }
+footer .wrap { padding-block: 26px 40px; font-size: .9rem; color: var(--muted); }
+footer a { margin-right: 1.1rem; display: inline-block; }
 </style>
 </head>
 <body>
-<header class="site-header">
+
+<header class="top">
   <div class="wrap">
-    <a class="brand" href="index.html">AR-песочница для клиники</a>
-    <nav class="nav" aria-label="Разделы"><a href="index.html" class="active">Главная</a><a href="wall-placement.html">Размещение у стены</a><a href="wall-layout-3d.html">3D-проверка</a><a href="hardware.html">Железо</a><a href="mounting.html">Крепление</a><a href="pipeline.html">Цикл и руки</a><a href="architecture.html">Архитектура ПО</a><a href="software-plan.html">План ПО</a><a href="roadmap.html">План работ</a><a href="https://amirrchik22.github.io/ar-sandbox/" class="ext" target="_blank" rel="noopener">Презентация для клиента</a></nav>
+    <div class="eyebrow">Проект для клиники</div>
+    <h1>AR-песочница</h1>
+    <p class="lead">Ящик с песком у стены. Сверху датчик глубины и проектор: ребёнок лепит рельеф руками, а на песок сразу ложится карта — низины синие, горы коричневые, между ними горизонтали. Занятие ведёт специалист.</p>
+    <div class="btns">
+      <a class="btn main" href="3d.html">Смотреть 3D-модель</a>
+      <a class="btn" href="https://github.com/amirrchik22/ar-sandbox-clinic">Репозиторий</a>
+    </div>
   </div>
 </header>
 
-<main class="wrap">
-
-  <section class="hero">
-    <h1>AR-песочница для клиники</h1>
-    <p class="lead">Ящик с песком, над ним датчик глубины и проектор: ребёнок лепит рельеф, а на песок ложится цветная карта с горизонталями. Софт ведёт сеансы, пишет видео и карту высот и строит отчёт специалисту.</p>
-    <span class="status">Статус: проектирование и скелет кода, рабочей версии нет</span>
-    <div class="actions">
-      <a class="btn primary" href="software-plan.html">План ПО: с чего начать</a>
-      <a class="btn" href="wall-placement.html">Размещение у стены</a>
-      <a class="btn" href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener">Презентация для клиента</a>
-    </div>
-  </section>
-
-  <h2 id="data">Ключевые данные</h2>
-  <p>Решения заказчика от 22.09.2026. Все документы на сайте опираются на эти числа.</p>
-  <dl class="kv">
-    <dt>Ящик</dt>
-    <dd>Размер ещё выбираем. Расчёты даны для <span class="num">1000 × 750 мм</span> внутри, рекомендация — <span class="num">1200 × 600 мм</span>: ширину задаёт картинка проектора (<span class="num">1,2 м</span>), глубину — то, докуда ребёнок дотягивается. Все варианты от 800 × 500 до 1400 × 800 — в разделе <a href="wall-placement.html#7-размер-песочницы-какие-варианты-даёт-наше-оборудование">«Размещение у стены»</a>. Фанера <span class="num">18 мм</span>, борт <span class="num">250 мм</span>. Стоит на полу вплотную к стене (зазор <span class="num">20 мм</span> под плинтус), длинной стороной вдоль стены.</dd>
-
-    <dt>Песок</dt>
-    <dd>Поверхность <span class="num">150 мм</span> от пола, слой <span class="num">130 мм</span>. Центр ящика <span class="num">X = 413 мм</span> от стены (для глубины 600 — <span class="num">338</span>) — это характеристика самого ящика, положение датчика она не задаёт.</dd>
-
-    <dt>Датчик, базовый</dt>
-    <dd>Kinect v2 (Xbox One): <span class="num">512 × 424</span> точки, поле <span class="num">70° × 60°</span>, дальность <span class="num">0,5–4,5 м</span>, USB 3.0 + свой блок питания (адаптер Kinect Adapter для ПК). Висит не над центром ящика, а на фиксированном выносе <span class="num">450 мм</span> от стены (ось <span class="num">X = 450 мм</span>, <span class="num">Y = 0</span>), <span class="num">1,30 м</span> над песком (<span class="num">1,45 м</span> от пола), смотрит вертикально вниз: зона <span class="num">1,82 × 1,50 м</span> (по глубине <span class="num">−300…+1200 мм</span> от стены, вдоль стены <span class="num">±910 мм</span>), <span class="num">3,6 мм</span> на точку, шум по высоте ≈ <span class="num">2 мм</span>. Ящик глубиной 600 занимает <span class="num">38…638 мм</span>, глубиной 750 — <span class="num">38…806 мм</span>: оба целиком в кадре, поэтому размер короба на положение датчика не влияет. Меряет временем полёта света, а не ИК-сеткой, поэтому не теряет крутые склоны и борта. Драйверы: libfreenect2 (Linux) или Kinect SDK 2.0 (Windows). Порт — USB 3.0 на контроллере Intel или Renesas, датчик включаем напрямую, без хаба.</dd>
-
-    <dt>Датчик, дешёвая альтернатива</dt>
-    <dd>Kinect v1 (Xbox 360): <span class="num">640 × 480</span>, поле <span class="num">57° × 43°</span>, USB 2.0 + блок 12 В; на той же консоли <span class="num">1,20 м</span> над песком (<span class="num">1,35 м</span> от пола). Точка мельче (<span class="num">2,0 мм</span> против 3,6), но высота шумнее (≈ <span class="num">3 мм</span> против 2) и ИК-сетка срывается на крутых склонах и бортах. <span class="note">Для песка обмен в пользу v2: детали рельефа крупнее 3,6 мм.</span></dd>
-
-    <dt>Проектор</dt>
-    <dd>Средний сегмент: 3LCD или DLP, XGA <span class="num">1024 × 768</span> или WXGA <span class="num">1280 × 800</span>, <span class="num">3300–4000 лм</span>, обычный объектив (отношение <span class="num">1,3–1,6</span>, зум), ручной фокус, HDMI. В паспорте разрешена установка объективом вниз (иначе зеркало 45°). Игровой режим, автотрапеция и интерполяция кадров выключены.</dd>
-
-    <dt>Компьютер</dt>
-    <dd>Покупаем — подходящего нет. Требование к покупке: материнская плата с USB 3.0 на контроллере <strong>Intel или Renesas</strong> (на контроллерах AMD и через дешёвые хабы Kinect v2 часто не заводится), дискретная видеокарта, HDMI на проектор.</dd>
-
-    <dt>Высоты</dt>
-    <dd>Объектив проектора <span class="num">1,95 м</span> от пола, <span class="num">80 мм</span> от стены, наклон к стене <span class="num">2,5°</span>; картинка <span class="num">1,2 × 0,9 м</span>, на песке <span class="num">0…882 мм</span> от стены. Датчик — <span class="num">1,45 м</span> от пола и <span class="num">450 мм</span> от стены (низ корпуса ≈ 1,42 м, выше правила «железо не ниже 1,40 м»); с v1 было бы 1,35 м.</dd>
-
-    <dt>Крепление</dt>
-    <dd>Только к стене. Стальная рейка <span class="num">40 × 40</span> на трёх анкерах M8 (низ <span class="num">1,30 м</span>, верх <span class="num">2,30 м</span>) на <span class="num">Y = +300 мм</span> от центра ящика; Г-образная консоль: продольная часть по <span class="num">Y = +300 мм</span> до <span class="num">X = 450 мм</span>, поперечина от неё к <span class="num">Y = 0</span> на той же <span class="num">X = 450 мм</span>, датчик под поперечиной. Запас от корпуса датчика до края луча проектора — <span class="num">114 мм</span>, тени на песке нет. <span class="note">Вынос фиксированный: узел крепления не зависит от размера короба — широкое поле Kinect v2 сняло требование центрировать датчик.</span> Проектор — на универсальном кронштейне, своя пластина по центру ящика, страховочный тросик.</dd>
-
-    <dt>Потолок</dt>
-    <dd>Натяжной, не ниже <span class="num">2,35 м</span> (верх проектора 2,28 м). К потолку ничего не крепим и ничего рядом не греем. Ниже 2,35 м — проектор на 1,85 м, объектив с отношением 1,4.</dd>
-
-    <dt>Стена</dt>
-    <dd>Бетон или кирпич. Гипсокартон — только в стойки каркаса или на сквозных шпильках; иначе напольная стойка 2,0 м без сверления.</dd>
-
-    <dt>Кабели</dt>
-    <dd>Канал <span class="num">40 × 25</span> по стене рядом с рейкой, <span class="num">25 × 16</span> вдоль плинтуса к тумбе с ПК сбоку от ящика. Ни одного кабеля ниже <span class="num">1,3 м</span> в зоне детей.</dd>
-
-    <dt>Задержка</dt>
-    <dd>Цель <span class="num">≤ 150 мс</span> от движения руки до перекраски; расчётный бюджет с Kinect v2 — <span class="num">130–190 мс</span> (сам датчик ≈ 60–70 мс). Чтобы уложиться: игровой режим проектора, сглаживание 1–2 кадра, отсечение рук без задержки, никакой цифровой трапеции, датчик в USB напрямую. Проверка: телефон 240 к/с, пять замеров, медиана.</dd>
-
-    <dt>Программа</dt>
-    <dd>Этап 0 — Magic Sand (бесплатно, Windows, без кода) для проверки железа. Дальше — собственный софт на Python, установка на Ubuntu 24.04 в режиме киоска.</dd>
-
-    <dt>Правила</dt>
-    <dd>Цен и имён детей в документах нет. Никаких заявлений о лечении: оборудование и ПО для развивающих и коррекционных занятий под контролем специалиста.</dd>
-  </dl>
-
-  <h2 id="sections">Разделы</h2>
-  <ul class="cards">
-    <li><a href="wall-placement.html"><span class="t">Размещение у стены</span><span class="d">Расчёт расстояний: ящик, датчик, проектор, узел крепления, кабели, чертежи.</span></a></li>
-    <li><a href="wall-layout-3d.html"><span class="t">3D-проверка</span><span class="d">Интерактивная модель: ребёнок, зона досягаемости, луч проектора, тени.</span></a></li>
-    <li><a href="hardware.html"><span class="t">Железо</span><span class="d">Комплектация и совместимость: Kinect v2 (v1 — дешёвая альтернатива), проектор, компьютер, ящик, лицензии.</span></a></li>
-    <li><a href="mounting.html"><span class="t">Крепление</span><span class="d">Рейка на стене, Г-образная консоль с выносом 450 мм, пластина проектора; напольная стойка как запас.</span></a></li>
-    <li><a href="pipeline.html"><span class="t">Цикл и руки</span><span class="d">Как работает цикл 30 раз в секунду, бюджет задержки, режимы для рук ребёнка.</span></a></li>
-    <li><a href="architecture.html"><span class="t">Архитектура ПО</span><span class="d">Полный проект системы: режимы, сеансы и запись, процессы, база данных, надёжность, право.</span></a></li>
-    <li><a href="software-plan.html"><span class="t">План ПО</span><span class="d">Понятным языком: неделя на Magic Sand, замер задержки, настройки проектора, чек-лист.</span></a></li>
-    <li><a href="roadmap.html"><span class="t">План работ</span><span class="d">Этапы 0–3, сроки и критерии готовности каждого этапа.</span></a></li>
-    <li><a href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener"><span class="t">Презентация для клиента</span><span class="d">Отдельный сайт для показа заказчику, без цен. Открывается в новой вкладке.</span></a></li>
-  </ul>
-
-  <h2 id="drawings">Чертежи</h2>
-  <p>Вид сбоку и вид сверху в масштабе. Нажмите на чертёж, чтобы открыть его отдельно.</p>
-  <div class="figs">
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Конструкция</div>
+    <h2>Ящик на полу, всё железо на стене</h2>
+    <p>Короб стоит на полу вплотную к стене — ребёнок играет сидя на корточках или на коленях. К потолку не крепим ничего: в кабинете натяжной потолок. Датчик и проектор висят на стальной рейке, прикрученной к стене анкерами.</p>
+    <table>
+      <tr><td>Ящик</td><td><span class="num">1200 × 800 мм</span> внутри (снаружи <span class="num">1236 × 836</span>), фанера <span class="num">18 мм</span>, зазор до стены <span class="num">20 мм</span> под плинтус</td></tr>
+      <tr><td>Песок</td><td>Слой <span class="num">180 мм</span> — хватает, чтобы копать до дна и не упираться. Поверхность <span class="num">198 мм</span> от пола. Нужно <span class="num">173 л</span>, это около <span class="num">259 кг</span> кварцевого просеянного</td></tr>
+      <tr><td>Борт</td><td><span class="num">300 мм</span> над дном, верх борта <span class="num">318 мм</span> от пола. Над песком остаётся свободных <span class="num">120 мм</span> — песок не выносится наружу. Кромку скругляем, внутренние швы на герметик, углы на уголки, чтобы песок не уходил в стыки</td></tr>
+      <tr><td>Датчик</td><td>Ось <span class="num">450 мм</span> от стены, <span class="num">1,45 м</span> от пола — это <span class="num">1,25 м</span> над песком. Вынос фиксированный: над центром ящика датчик резал бы луч проектора</td></tr>
+      <tr><td>Проектор</td><td>Объектив <span class="num">1,95 м</span> от пола и <span class="num">80 мм</span> от стены, смотрит вниз с наклоном <span class="num">2,6°</span>. Картинка на песке — от стены до <span class="num">910 мм</span>, ящик накрыт целиком</td></tr>
+      <tr><td>Крепление</td><td>Рейка <span class="num">40 × 40</span> на трёх анкерах M8 (<span class="num">1,30–2,30 м</span>), Г-образная консоль под датчик, кронштейн проектора, страховочный тросик</td></tr>
+    </table>
     <figure>
-      <a href="img/wall-placement.svg" target="_blank" rel="noopener"><img src="img/wall-placement.svg" alt="Размещение у стены, вид сбоку" loading="lazy"></a>
-      <figcaption>Вид сбоку: стена слева, ящик на полу, датчик на 1,45 м, объектив проектора на 1,95 м.</figcaption>
-    </figure>
-    <figure>
-      <a href="img/wall-plan.svg" target="_blank" rel="noopener"><img src="img/wall-plan.svg" alt="Размещение у стены, вид сверху" loading="lazy"></a>
-      <figcaption>Вид сверху: рейка на Y = +300 мм, Г-образная консоль, датчик на выносе 450 мм от стены, проектор по центру.</figcaption>
+      <img src="img/wall-placement.svg" alt="Чертёж вида сбоку: ящик с песком на полу у стены, датчик на консоли в 450 мм от стены на высоте 1,45 м, проектор выше на 1,95 м, конус датчика и луч проектора не пересекаются, ребёнок у переднего борта">
+      <figcaption>Вид сбоку, в масштабе. Конус датчика и луч проектора не пересекаются — тени на песке нет. <a href="img/wall-plan.svg">Вид сверху</a></figcaption>
     </figure>
   </div>
+</section>
 
-  <h2 id="next">Что дальше</h2>
-  <ol class="steps">
-    <li><span class="t">Этап 0: неделя на Magic Sand</span><span class="d">Kinect v2 и проектор на штатных местах над ящиком, калибровка по мастеру, замер задержки телефоном 240 к/с, час непрерывной работы. Порядок — в <a href="software-plan.html">плане ПО</a>, критерии — в <a href="roadmap.html">плане работ</a>.</span></li>
-    <li><span class="t">Замерить кабинет</span><span class="d">Материал стены, высота натяжного потолка над ящиком (нужно не меньше 2,35 м), плинтус, розетки, свободная длина вдоль стены; решить глубину ящика — 750 или 600. Список — в <a href="wall-placement.html#10-что-измерить-перед-монтажом">разделе 10</a>.</span></li>
-    <li><span class="t">Выбрать проектор по паспорту</span><span class="d">Разрешена установка объективом вниз, выдув сбоку (не в потолок), игровой режим, проекционное отношение 1,3–1,6. Требования — в разделе <a href="hardware.html">«Железо»</a>.</span></li>
-  </ol>
-
-  <p><a class="btn" href="https://github.com/amirrchik22/ar-sandbox-clinic" target="_blank" rel="noopener">Репозиторий проекта на GitHub</a></p>
-
-</main>
-
-<footer class="site-footer">
+<section>
   <div class="wrap">
-    <span>AR-песочница для клиники · документация проекта · обновлено 22.09.2026</span>
-    <span><a href="https://github.com/amirrchik22/ar-sandbox-clinic" target="_blank" rel="noopener">Репозиторий на GitHub</a> · <a href="https://amirrchik22.github.io/ar-sandbox/" target="_blank" rel="noopener">Презентация для клиента</a></span>
+    <div class="eyebrow">Устройства</div>
+    <h2>Что стоит и зачем</h2>
+    <table>
+      <tr><th>Устройство</th><th>Зачем нужно</th><th>Главное</th></tr>
+      <tr>
+        <td>Датчик глубины<br>Kinect v2</td>
+        <td>Меряет расстояние до каждой точки песка и отдаёт карту высот. Работает инфракрасным светом, поэтому проекция ему не мешает</td>
+        <td class="num">512 × 424 · 70° × 60°<br>зона 1,75 × 1,45 м<br>3,4 мм на точку<br>USB 3.0 (Intel / Renesas)</td>
+      </tr>
+      <tr>
+        <td>Проектор</td>
+        <td>Рисует карту прямо на песке. Висит объективом вниз, геометрию правит программа, а не автотрапеция</td>
+        <td class="num">XGA или WXGA<br>3300–4000 лм<br>отношение 1,3–1,6 (рабочее 1,41)<br>игровой режим</td>
+      </tr>
+      <tr>
+        <td>Компьютер</td>
+        <td>Принимает карту высот, красит её и отдаёт картинку проектору. Ведёт сеанс, пишет видео и отчёт</td>
+        <td class="num">дискретная видеокарта<br>USB 3.0 Intel / Renesas<br>Ubuntu 24.04</td>
+      </tr>
+      <tr>
+        <td>Короб и крепление</td>
+        <td>Держат песок и железо. Делаются на месте по чертежу</td>
+        <td class="num">фанера 18 мм<br>рейка 40 × 40<br>анкеры M8</td>
+      </tr>
+    </table>
+    <p class="rules">Ответ на движение руки — цель не больше <span class="num">150 мс</span>. Из них датчик съедает <span class="num">60–70</span>, обработка и отрисовка <span class="num">50–90</span>, проектор в игровом режиме <span class="num">16–40</span>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Подключение</div>
+    <h2>Три кабеля и две розетки</h2>
+    <div class="wirebox">
+      <div class="wire">
+        <svg viewBox="0 0 700 250" role="img" aria-label="Схема подключения: датчик Kinect v2 соединён с компьютером кабелем USB 3.0 и имеет свой блок питания 12 вольт, компьютер соединён с проектором кабелем HDMI, компьютер и проектор включены в сетевой фильтр">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g font-family="Golos Text, sans-serif" font-size="13">
+            <rect x="8" y="30" width="170" height="56" rx="9" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+            <text x="93" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Датчик Kinect v2</text>
+            <text x="93" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">на консоли, 1,45 м</text>
+
+            <rect x="265" y="30" width="170" height="56" rx="9" fill="none" stroke="var(--line-2)" stroke-width="1.6"/>
+            <text x="350" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Компьютер</text>
+            <text x="350" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">в тумбе сбоку</text>
+
+            <rect x="522" y="30" width="170" height="56" rx="9" fill="none" stroke="var(--warm)" stroke-width="1.6"/>
+            <text x="607" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Проектор</text>
+            <text x="607" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">на стене, 1,95 м</text>
+
+            <g color="var(--muted)">
+              <line x1="180" y1="58" x2="258" y2="58" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar)"/>
+              <line x1="437" y1="58" x2="515" y2="58" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar)"/>
+            </g>
+            <text x="219" y="46" text-anchor="middle" fill="var(--muted)" font-size="11.5">USB 3.0</text>
+            <text x="476" y="46" text-anchor="middle" fill="var(--muted)" font-size="11.5">HDMI</text>
+
+            <rect x="265" y="168" width="170" height="48" rx="9" fill="none" stroke="var(--line-2)" stroke-width="1.6" stroke-dasharray="5 4"/>
+            <text x="350" y="190" text-anchor="middle" fill="var(--text)" font-weight="600">Сетевой фильтр</text>
+            <text x="350" y="207" text-anchor="middle" fill="var(--muted)" font-size="11.5">220 В, розетка у тумбы</text>
+
+            <g color="var(--line-2)" stroke-dasharray="4 4">
+              <path d="M93,88 L93,192 L262,192" fill="none" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M350,88 L350,165" fill="none" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M607,88 L607,192 L438,192" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            </g>
+            <text x="100" y="128" fill="var(--muted)" font-size="11.5">блок 12 В</text>
+            <text x="614" y="128" fill="var(--muted)" font-size="11.5" text-anchor="end">питание</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <p class="rules">Датчик включается в порт компьютера напрямую, без хабов: на дешёвых хабах и контроллерах AMD он часто не определяется. Все кабели идут в закрытом канале по стене и вдоль плинтуса — в зоне, куда достаёт ребёнок, ни одного открытого провода.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Что делаем</div>
+    <h2>Своими руками, покупкой и кодом</h2>
+    <div class="cols">
+      <div>
+        <h3>Делаем сами</h3>
+        <ul>
+          <li>Короб из фанеры с бортом 300 мм</li>
+          <li>Г-образная консоль под датчик</li>
+          <li>Монтаж рейки и кабель-каналов</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Покупаем</h3>
+        <ul>
+          <li>Kinect v2 с адаптером для ПК</li>
+          <li>Проектор с допуском «объективом вниз»</li>
+          <li>Компьютер и кронштейн проектора</li>
+          <li>Песок, фанера, анкеры, кабели</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Пишем</h3>
+        <ul>
+          <li>Программу сеанса: карта высот, цвета, горизонтали</li>
+          <li>Запись занятия и отчёт специалисту</li>
+          <li>Спокойные режимы под состояние ребёнка</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Порядок</div>
+    <h2>Как идём</h2>
+    <ol class="steps">
+      <li><b>Собираем железо.</b> Короб, рейка, консоль, датчик и проектор на своих высотах, кабели в каналах.</li>
+      <li><b>Проверяем готовой программой.</b> Бесплатный Magic Sand на неделю: убеждаемся, что датчик видит песок, картинка совпадает с рельефом и задержка укладывается в норму.</li>
+      <li><b>Ставим свою программу.</b> Сеансы с записью, профили детей, спокойные режимы, отчёты. Компьютер работает в режиме киоска: включил — и сразу занятие.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="3d.html">3D-модель</a>
+    <a href="https://github.com/amirrchik22/ar-sandbox-clinic">Исходники и расчёты</a>
+    <a href="https://amirrchik22.github.io/ar-sandbox/">Презентация для клиники</a>
+    <p>Оборудование и программа для развивающих и коррекционных занятий под контролем специалиста. Обновлено 23.09.2026.</p>
   </div>
 </footer>
+
 </body>
 </html>

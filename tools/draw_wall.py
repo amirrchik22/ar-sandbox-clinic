@@ -8,11 +8,12 @@ python tools/draw_wall.py            # пишет docs/img/wall-placement.svg и
 import math, pathlib
 
 P = dict(
-    GAP=0.020, PLY=0.018, D=0.750, L=1.000, WALL_H=0.250, SAND=0.150,
-    SENS_ABOVE=1.30, FOV=(70, 60), SENS_RES=512, SENS_NAME="Kinect v2",
+    GAP=0.020, PLY=0.018, D=0.800, L=1.200, WALL_H=0.300, SAND=0.198,
+    SAND_LAYER=0.180,                   # слой песка; поверхность песка = PLY + SAND_LAYER
+    SENS_ABOVE=1.252, FOV=(70, 60), SENS_RES=512, SENS_NAME="Kinect v2",
     SENS_X=0.450, SENS_BODY=0.067,      # ось датчика от стены (X) и глубина корпуса, м — вынос фиксирован, от размера ящика не зависит
     ARM_Y=0.30,                         # вынос консоли вдоль стены (Y), м
-    THROW=1.5, W_IMG=1.2, OFFSET=1.0, X_LENS=0.08,
+    THROW=1.413, W_IMG=1.24, OFFSET=1.0, X_LENS=0.08,
 )
 OUT = pathlib.Path(__file__).resolve().parents[1] / "docs" / "img"
 
