@@ -1,45 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 560" font-family="Helvetica, Arial, sans-serif" font-size="11">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 600" font-family="Helvetica, Arial, sans-serif" font-size="11">
 <defs><pattern id="h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#9aa5b1" stroke-width="1"/></pattern></defs>
-<rect width="780" height="560" fill="#fff"/>
-<rect x="20" y="24" width="740" height="20" fill="url(#h)" stroke="#6f7a86"/>
-<line x1="20" y1="44" x2="760" y2="44" stroke="#37434f" stroke-width="2"/>
-<text x="756" y="38" text-anchor="end" fill="#1d232a">стена</text>
+<rect width="820" height="600" fill="#fff"/>
+<rect x="20" y="24" width="780" height="20" fill="url(#h)" stroke="#6f7a86"/>
+<line x1="20" y1="44" x2="800" y2="44" stroke="#37434f" stroke-width="2"/>
+<text x="796" y="38" text-anchor="end" fill="#1d232a">стена</text>
 <rect x="133.7" y="44.0" width="536.6" height="337.4" fill="none" stroke="#9aa5b1" stroke-dasharray="6 4"/>
-<text x="137.7" y="375.4" fill="#5d6771" font-size="10.5">свободная зона 0,6 м вокруг ящика</text>
+<text x="137.7" y="375.4" fill="#5d6771" font-size="10.5">свободная зона 0,6 м с трёх сторон</text>
 <rect x="258.0" y="44.0" width="288.0" height="211.7" fill="#f0a64a" opacity="0.10" stroke="#c77a1d" stroke-width="1.3"/>
 <rect x="255.5" y="44.0" width="436.9" height="279.3" fill="#1a8c9c" opacity="0.06" stroke="#1a8c9c" stroke-width="1.3" stroke-dasharray="5 3"/>
 <rect x="277.7" y="48.8" width="248.6" height="188.6" fill="#8a6a45"/>
 <rect x="282.0" y="53.1" width="240.0" height="180.0" fill="#d9c79a"/>
-<text x="402.0" y="147.1" text-anchor="middle" fill="#5d6771">песок 1000 × 750 (внутри)</text>
+<text x="402.0" y="206.4" text-anchor="middle" fill="#5d6771">песок 1000 × 750 внутри, борт 18 мм</text>
 <rect x="366.0" y="58.4" width="72.0" height="52.8" fill="#c77a1d" opacity="0.28"/>
+<text x="402.0" y="129.6" text-anchor="middle" fill="#8a5a12" font-size="10">сечение луча на высоте консоли 1,50 м</text>
 <rect x="469.2" y="44.0" width="9.6" height="106.3" fill="#6f7a86"/>
 <rect x="444.1" y="135.2" width="59.8" height="15.8" fill="#1a8c9c"/>
 <rect x="366.0" y="51.2" width="72.0" height="24.0" fill="#c77a1d"/>
 <circle cx="402.0" cy="63.2" r="3.5" fill="#1b1f24"/>
-<rect x="486.0" y="44.0" width="9.6" height="6.0" fill="#e8e4dc" stroke="#6f7a86"/>
 <rect x="486.0" y="44.0" width="168.0" height="6.0" fill="#e8e4dc" stroke="#6f7a86"/>
 <rect x="606.0" y="48.8" width="96.0" height="96.0" fill="#a79c8c" stroke="#6f7a86"/>
-<text x="654.0" y="100.8" text-anchor="middle" fill="#fff" font-size="10.5">тумба: ПК, ИБП</text>
+<text x="654.0" y="96.0" text-anchor="middle" fill="#fff" font-size="10.5">тумба</text>
+<text x="654.0" y="110.4" text-anchor="middle" fill="#fff" font-size="10.5">ПК, ИБП, фильтр</text>
 <g transform="translate(339.6 275.8) rotate(0)"><ellipse rx="45.6" ry="21.6" fill="#9aa5b1" opacity="0.6"/><circle cy="-7.2" r="18.0" fill="#9aa5b1"/></g>
 <g transform="translate(464.4 275.8) rotate(0)"><ellipse rx="45.6" ry="21.6" fill="#9aa5b1" opacity="0.6"/><circle cy="-7.2" r="18.0" fill="#9aa5b1"/></g>
 <g transform="translate(239.3 143.1) rotate(90)"><ellipse rx="45.6" ry="21.6" fill="#9aa5b1" opacity="0.6"/><circle cy="-7.2" r="18.0" fill="#9aa5b1"/></g>
 <g transform="translate(564.7 143.1) rotate(90)"><ellipse rx="45.6" ry="21.6" fill="#9aa5b1" opacity="0.6"/><circle cy="-7.2" r="18.0" fill="#9aa5b1"/></g>
-<line x1="277.7" y1="356.0" x2="526.3" y2="356.0" stroke="#5d6771"/>
-<line x1="277.7" y1="352.0" x2="277.7" y2="360.0" stroke="#5d6771"/>
-<line x1="526.3" y1="352.0" x2="526.3" y2="360.0" stroke="#5d6771"/>
-<text x="402.0" y="370.0" text-anchor="middle" fill="#5d6771" font-size="10.5">ящик снаружи 1036 мм</text>
 <line x1="258.0" y1="356.0" x2="546.0" y2="356.0" stroke="#5d6771"/>
 <line x1="258.0" y1="352.0" x2="258.0" y2="360.0" stroke="#5d6771"/>
 <line x1="546.0" y1="352.0" x2="546.0" y2="360.0" stroke="#5d6771"/>
-<text x="402.0" y="350.0" text-anchor="middle" fill="#5d6771" font-size="10.5">картинка проектора 1200 мм</text>
-<line x1="402.0" y1="384.8" x2="474.0" y2="384.8" stroke="#5d6771"/>
-<line x1="402.0" y1="380.8" x2="402.0" y2="388.8" stroke="#5d6771"/>
-<line x1="474.0" y1="380.8" x2="474.0" y2="388.8" stroke="#5d6771"/>
-<text x="438.0" y="398.8" text-anchor="middle" fill="#5d6771" font-size="10.5">консоль датчика +300 мм от центра</text>
-<line x1="255.5" y1="384.8" x2="692.5" y2="384.8" stroke="#5d6771"/>
-<line x1="255.5" y1="380.8" x2="255.5" y2="388.8" stroke="#5d6771"/>
-<line x1="692.5" y1="380.8" x2="692.5" y2="388.8" stroke="#5d6771"/>
-<text x="474.0" y="378.8" text-anchor="middle" fill="#5d6771" font-size="10.5">поле датчика 1820 мм</text>
+<text x="402.0" y="369.0" text-anchor="middle" fill="#5d6771" font-size="10.5">картинка проектора 1200 мм</text>
+<line x1="277.7" y1="377.6" x2="526.3" y2="377.6" stroke="#5d6771"/>
+<line x1="277.7" y1="373.6" x2="277.7" y2="381.6" stroke="#5d6771"/>
+<line x1="526.3" y1="373.6" x2="526.3" y2="381.6" stroke="#5d6771"/>
+<text x="402.0" y="390.6" text-anchor="middle" fill="#5d6771" font-size="10.5">ящик снаружи 1036 мм</text>
+<line x1="255.5" y1="399.2" x2="692.5" y2="399.2" stroke="#5d6771"/>
+<line x1="255.5" y1="395.2" x2="255.5" y2="403.2" stroke="#5d6771"/>
+<line x1="692.5" y1="395.2" x2="692.5" y2="403.2" stroke="#5d6771"/>
+<text x="474.0" y="412.2" text-anchor="middle" fill="#5d6771" font-size="10.5">поле датчика 1820 мм</text>
+<line x1="402.0" y1="420.8" x2="474.0" y2="420.8" stroke="#5d6771"/>
+<line x1="402.0" y1="416.8" x2="402.0" y2="424.8" stroke="#5d6771"/>
+<line x1="474.0" y1="416.8" x2="474.0" y2="424.8" stroke="#5d6771"/>
+<text x="438.0" y="433.8" text-anchor="middle" fill="#5d6771" font-size="10.5">консоль +300 мм от центра</text>
 <line x1="229.2" y1="44.0" x2="229.2" y2="143.1" stroke="#5d6771"/>
 <line x1="225.2" y1="44.0" x2="233.2" y2="44.0" stroke="#5d6771"/>
 <line x1="225.2" y1="143.1" x2="233.2" y2="143.1" stroke="#5d6771"/>
@@ -56,13 +57,15 @@
 <line x1="124.4" y1="44.0" x2="132.4" y2="44.0" stroke="#5d6771"/>
 <line x1="124.4" y1="63.2" x2="132.4" y2="63.2" stroke="#5d6771"/>
 <text transform="translate(123.4 53.6) rotate(-90)" text-anchor="middle" fill="#5d6771" font-size="10.5">объектив 80</text>
-<text x="361.2" y="87.2" text-anchor="end" fill="#1d232a" font-size="11">проектор на пластине, Y = 0</text>
-<text x="510.0" y="72.0" text-anchor="start" fill="#1d232a" font-size="11">рейка 40×40 и консоль 450, Y = +300</text>
-<text x="510.0" y="86.4" text-anchor="start" fill="#1d232a" font-size="11">сечение луча на высоте консоли: ±150 по Y, до 280 от стены</text>
-<text x="510.0" y="100.8" text-anchor="start" fill="#1d232a" font-size="11">зазор консоль–луч 130 мм, тени нет</text>
-<text x="505.2" y="147.1" text-anchor="start" fill="#1d232a" font-size="11">датчик Kinect v2, ось X = 413</text>
-<text x="534.0" y="55.2" text-anchor="start" fill="#1d232a" font-size="10.5">кабель-канал по стене → вдоль плинтуса → тумба</text>
+<text x="361.2" y="69.6" text-anchor="end" fill="#1d232a" font-size="11">проектор, Y = 0</text>
+<text x="483.6" y="76.8" text-anchor="start" fill="#1d232a" font-size="10.5">рейка, Y = +300</text>
+<text x="438.0" y="147.1" text-anchor="end" fill="#1d232a" font-size="11">датчик, X = 413</text>
+<text x="486.0" y="54.2" text-anchor="start" fill="#5d6771" font-size="9.5">кабель-канал → тумба</text>
 <text x="402.0" y="318.2" text-anchor="middle" fill="#1d232a" font-size="11">двое детей спереди</text>
-<text x="564.7" y="199.9" text-anchor="middle" fill="#1d232a" font-size="10.5">по одному с торцов</text>
-<text x="390.0" y="548.0" text-anchor="middle" fill="#1d232a" font-size="11">Вид сверху, масштаб один по осям. Стена сверху. X — от стены, Y — вдоль стены от центра ящика, мм.</text>
+<text x="564.7" y="204.7" text-anchor="middle" fill="#1d232a" font-size="10.5">по одному с торцов</text>
+<text x="90.0" y="452.0" text-anchor="start" fill="#1d232a" font-size="10.5">Проектор на настенной пластине по центру ящика (Y = 0), объектив на 80 мм от стены и 1,95 м от пола.</text>
+<text x="90.0" y="467.0" text-anchor="start" fill="#1d232a" font-size="10.5">Рейка 40×40 и консоль датчика на Y = +300: сечение луча на высоте консоли ±150 мм по Y и до 280 мм от стены, зазор до консоли 130 мм — тени нет.</text>
+<text x="90.0" y="482.0" text-anchor="start" fill="#1d232a" font-size="10.5">Датчик на 1,45 м, ось X = 413 (центр ящика); поле 1,82 × 1,50 м накрывает ящик с запасом 9 см с дальнего края.</text>
+<text x="90.0" y="497.0" text-anchor="start" fill="#1d232a" font-size="10.5">Кабель-канал по стене рядом с рейкой, затем вдоль плинтуса к тумбе; ни одного кабеля ниже 1,4 м в зоне детей.</text>
+<text x="410.0" y="588.0" text-anchor="middle" fill="#1d232a" font-size="11">Вид сверху, масштаб один по осям. Стена сверху. X — от стены, Y — вдоль стены от центра ящика, мм.</text>
 </svg>
