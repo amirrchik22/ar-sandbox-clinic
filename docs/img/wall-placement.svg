@@ -68,7 +68,7 @@
 <text x="108.0" y="24.4" text-anchor="start" fill="#1d232a" font-size="11">рейка 40×40, три анкера M8, низ 1,20 м, верх 2,30 м</text>
 <text x="113.2" y="60.8" text-anchor="start" fill="#1d232a" font-size="11">проектор объективом вниз, дном к стене, на универсальном кронштейне;</text>
 <text x="113.2" y="72.8" text-anchor="start" fill="#1d232a" font-size="11">наклон к стене 2.5°, отношение 1.5, картинка 1.2×0.90 м, страховочный трос</text>
-<text x="204.1" y="212.0" text-anchor="start" fill="#1d232a" font-size="11">датчик Kinect v2 над центром ящика, шаровая головка на консоли</text>
+<text x="204.1" y="212.0" text-anchor="start" fill="#1d232a" font-size="11">датчик Kinect v2 на консоли, сдвинутой на 300 мм вдоль стены (вне луча)</text>
 <text x="204.1" y="224.0" text-anchor="start" fill="#1d232a" font-size="11">видит 1.82×1.50 м, стена попадает в кадр ниже 0.73 м</text>
 <text x="261.4" y="363.2" text-anchor="start" fill="#1d232a" font-size="11">ребёнок 5 лет у переднего борта:</text>
 <text x="261.4" y="375.2" text-anchor="start" fill="#1d232a" font-size="11">голова вне луча проектора, тени только от рук</text>

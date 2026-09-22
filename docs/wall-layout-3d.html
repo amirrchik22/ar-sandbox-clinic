@@ -73,7 +73,7 @@
 
 <div class="wrap">
   <h1>Песочница у стены: удобно ли ребёнку</h1>
-  <p class="lead">Ящик стоит на полу вплотную к стене, датчик и проектор на консолях от настенной рейки. Выбери возраст, позу и сторону, где сидит ребёнок: на песке появится карта, куда он достаёт, а справа — проверки по лучу проектора, датчику и зазорам. Вращай сцену мышью, приближай колёсиком.</p>
+  <p class="lead">Ящик стоит на полу вплотную к стене. Проектор — на настенном кронштейне по центру ящика, датчик — на консоли от рейки, сдвинутой на 30 см вдоль стены, чтобы консоль не попадала в луч проектора. Выбери возраст, позу и сторону, где сидит ребёнок: на песке появится карта, куда он достаёт, а справа — проверки по лучу проектора, датчику и зазорам. Вращай сцену мышью, приближай колёсиком.</p>
 
   <div class="app">
     <div class="stage" id="stage">
@@ -84,7 +84,7 @@
         <button class="btn" data-cam="side" aria-pressed="false" type="button">Сбоку</button>
         <button class="btn" data-cam="eyes" aria-pressed="false" type="button">Глазами ребёнка</button>
       </div>
-      <div class="hint" id="hint">центр ящика 413 мм от стены<br>датчик 1,45 м · объектив 1,95 м<br>низ железа 1,42 м</div>
+      <div class="hint" id="hint">центр ящика 413 мм от стены<br>датчик 1,45 м, консоль +30 см вдоль стены<br>объектив 1,95 м · низ железа 1,42 м</div>
       <div class="legend">
         <span><i style="background:var(--ok)"></i>Достаёт свободно</span>
         <span><i style="background:var(--warn)"></i>Достаёт на пределе</span>
@@ -134,7 +134,7 @@
       <h2>Проверки</h2>
       <ul class="checks" id="checks"></ul>
 
-      <p class="note">Досягаемость: 3 года — 45 см, 5 лет — 52 см, 8 лет — 60 см, взрослый — 75 см от борта; «свободно» — 80 % от этого. Высоты по расчёту у стены: песок 0,15 м, датчик 1,45 м, объектив 1,95 м, картинка до 0,88 м от стены. Фигурка схематична, пропорции детские.</p>
+      <p class="note">Фигура строится от роста: рука 40 % роста (у взрослого 44 %), корпус 30 %, голова, бёдра и голени по детским пропорциям. Зелёное — куда достаёт прямая рука при удобном наклоне корпуса, жёлтое — при сильном наклоне над бортом (до 60°, стоя до 80°), красное — не достать. Высоты по расчёту у стены: песок 0,15 м, датчик 1,45 м, объектив 1,95 м, картинка до 0,88 м от стены.</p>
     </aside>
   </div>
 </div>
@@ -146,7 +146,7 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- геометрия у стены (метры). x — от стены, y — вверх, z — вдоль стены, 0 в центре ящика
-  var C = { GAP: 0.02, PLY: 0.018, WALL_H: 0.25, SAND: 0.15, L: 1.0, SENS_Y: 1.45, LENS_X: 0.08, LENS_Y: 1.95, IMG_FAR: 0.882, IMG_HALF: 0.6, HW_BOTTOM: 1.42 };
+  var C = { GAP: 0.02, PLY: 0.018, WALL_H: 0.25, SAND: 0.15, L: 1.0, SENS_Y: 1.45, LENS_X: 0.08, LENS_Y: 1.95, IMG_FAR: 0.882, IMG_HALF: 0.6, HW_BOTTOM: 1.42, ARM_Z: 0.30 };
   var AGES = { "3": { h: 0.95, reach: 0.45, name: "3 года" }, "5": { h: 1.10, reach: 0.52, name: "5 лет" }, "8": { h: 1.28, reach: 0.60, name: "8 лет" }, adult: { h: 1.70, reach: 0.75, name: "взрослый" } };
   var S = { depth: 0.75, age: "5", pose: "squat", side: "front", cam: "overview" };
   function outD() { return S.depth + 2 * C.PLY; }
@@ -197,9 +197,9 @@
 
   // ---------- рейка, консоли, датчик, проектор (положение фиксировано, консоль датчика зависит от глубины)
   var fixed = new THREE.Group(); scene.add(fixed);
-  box(0.04, 1.10, 0.04, 0.02, 1.75, 0, matSteel, fixed);                    // рейка 1,20–2,30
-  box(0.16, 0.04, 0.04, 0.08, 2.26, 0, matSteel, fixed);                    // верхняя консоль
-  box(0.02, 0.04, 0.02, C.LENS_X, 2.22, 0, matSteel, fixed);
+  box(0.04, 0.90, 0.04, 0.02, 1.85, C.ARM_Z, matSteel, fixed);             // рейка 1,40–2,30, сдвинута вдоль стены
+  box(0.02, 0.14, 0.14, 0.01, 2.08, 0, matSteel, fixed);                    // пластина кронштейна проектора на стене
+  box(0.02, 0.04, 0.04, 0.025, 2.08, 0, matSteel, fixed);                   // короткая штанга кронштейна
   var projG = new THREE.Group(); projG.position.set(C.LENS_X, C.LENS_Y, 0); projG.rotation.z = -THREE.MathUtils.degToRad(2.5); fixed.add(projG);
   box(0.10, 0.25, 0.30, 0, 0.125, 0, matProj, projG);
   var lensM = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.015, 24), new THREE.MeshLambertMaterial({ color: 0x1b1f24 })); lensM.position.set(0, -0.005, 0.06); projG.add(lensM);
@@ -208,16 +208,16 @@
   function buildArm() {
     while (armG.children.length) armG.remove(armG.children[0]);
     var reach = xc() + 0.03;
-    box(reach, 0.04, 0.04, reach / 2, 1.50, 0, matSteel, armG);
-    box(0.10, 0.02, 0.08, xc(), 1.485, 0, matSteel, armG);
-    sensorM = box(0.066, 0.067, 0.249, xc(), C.SENS_Y, 0, matSensor, armG);
-    var eye = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 16), new THREE.MeshLambertMaterial({ color: 0x0b2b31 })); eye.position.set(xc(), C.SENS_Y - 0.035, 0.02); armG.add(eye);
+    box(reach, 0.04, 0.04, reach / 2, 1.50, C.ARM_Z, matSteel, armG);
+    box(0.10, 0.02, 0.08, xc(), 1.485, C.ARM_Z, matSteel, armG);
+    sensorM = box(0.066, 0.067, 0.249, xc(), C.SENS_Y, C.ARM_Z, matSensor, armG);
+    var eye = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 16), new THREE.MeshLambertMaterial({ color: 0x0b2b31 })); eye.position.set(xc(), C.SENS_Y - 0.035, C.ARM_Z + 0.02); armG.add(eye);
   }
 
   // ---------- кабель-канал и тумба
   var cables = new THREE.Group(); scene.add(cables);
-  box(0.025, 2.25, 0.04, 0.0125, 1.175, 0.07, matChan, cables);              // канал по рейке
-  box(0.025, 0.02, 0.95, 0.0125, 0.075, 0.545, matChan, cables);             // канал вдоль плинтуса
+  box(0.025, 2.25, 0.04, 0.0125, 1.175, C.ARM_Z + 0.07, matChan, cables);    // канал рядом с рейкой
+  box(0.025, 0.02, 0.70, 0.0125, 0.075, C.ARM_Z + 0.42, matChan, cables);    // канал вдоль плинтуса
   box(0.40, 0.60, 0.40, 0.22, 0.30, 1.05, matCab, cables);                   // тумба с ПК
   box(0.24, 0.012, 0.17, 0.22, 0.606, 1.05, new THREE.MeshLambertMaterial({ color: 0x2b2f36 }), cables);  // планшет
 
@@ -260,7 +260,7 @@
   var reachStats = { ok: 0, warn: 0, bad: 0, strip: 0 };
   function buildReach() {
     if (reachMesh) { boxG.remove(reachMesh); reachMesh = null; }
-    var A = AGES[S.age], R = A.reach + (S.pose === "stand" ? 0.08 : 0), Rc = 0.8 * R;
+    var R = kidInfo.Rmax, Rc = kidInfo.Rcomf;
     var g = new THREE.PlaneGeometry(S.depth, C.L, 60, 80); g.rotateX(-Math.PI / 2);
     var pos = g.attributes.position, col = new Float32Array(pos.count * 3), n = { ok: 0, warn: 0, bad: 0 };
     var cOk = [0.18, 0.62, 0.41], cW = [0.76, 0.68, 0.17], cB = [0.71, 0.21, 0.15];
@@ -291,43 +291,71 @@
   function buildFov() {
     if (fov) scene.remove(fov);
     var hz = 1.3 * Math.tan(THREE.MathUtils.degToRad(35)), hx = 1.3 * Math.tan(THREE.MathUtils.degToRad(30)), y = C.SAND;
-    var x0 = Math.max(0.002, xc() - hx), x1 = xc() + hx;
-    fov = pyramid(new THREE.Vector3(xc(), C.SENS_Y - 0.04, 0), [[x0, y, -hz], [x1, y, -hz], [x1, y, hz], [x0, y, hz]], 0x37b7c8);
+    var x0 = Math.max(0.002, xc() - hx), x1 = xc() + hx, z0 = C.ARM_Z - hz, z1 = C.ARM_Z + hz;
+    fov = pyramid(new THREE.Vector3(xc(), C.SENS_Y - 0.04, C.ARM_Z), [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]], 0x37b7c8);
     fov.visible = document.getElementById("tFov").checked;
   }
   var spot = new THREE.SpotLight(0xffe2b8, 1.5, 4, 0.56, 0.5, 1.2);
   spot.position.set(C.LENS_X, C.LENS_Y, 0); spot.target.position.set(0.45, C.SAND, 0); spot.castShadow = true;
   spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0004; scene.add(spot); scene.add(spot.target);
 
-  // ---------- ребёнок: три позы в масштабе ребёнка 1,10 м, вперёд = -x
+  // ---------- ребёнок: пропорции от роста, наклон корпуса подбирается так, чтобы прямая рука доставала до песка
   var kid = new THREE.Group(); scene.add(kid);
-  var kidInfo = { head: new THREE.Vector3(), headR: 0.085, eyes: new THREE.Vector3() };
+  var kidInfo = { head: new THREE.Vector3(), headR: 0.08, eyes: new THREE.Vector3(), Rcomf: 0.3, Rmax: 0.5, lean: 25 };
   function V(x, y, z) { return new THREE.Vector3(x, y, z); }
   function limb(a, b, r, g) { var v = new THREE.Vector3().subVectors(b, a), len = v.length(); var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 12), matKid); m.position.copy(a).addScaledVector(v, 0.5); m.quaternion.setFromUnitVectors(V(0, 1, 0), v.normalize()); m.castShadow = true; g.add(m); }
   function ball(p, r, g) { var m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), matKid); m.position.copy(p); m.castShadow = true; g.add(m); }
+  // точки в долях роста H; x < 0 — вперёд, к ящику. Стопы у борта, ступни на 6 см позади борта
   var POSES = {
-    squat: { legs: function (g) { [-0.09, 0.09].forEach(function (z) { limb(V(-0.1, 0.03, z), V(-0.1, 0.32, z), 0.035, g); ball(V(-0.1, 0.33, z), 0.045, g); limb(V(-0.1, 0.33, z), V(0.1, 0.36, z), 0.042, g); limb(V(-0.17, 0.03, z), V(-0.05, 0.03, z), 0.03, g); }); }, hip: V(0.1, 0.38, 0), shoulder: V(-0.02, 0.66, 0), head: V(-0.04, 0.78, 0) },
-    kneel: { legs: function (g) { [-0.09, 0.09].forEach(function (z) { limb(V(0.0, 0.05, z), V(0.36, 0.05, z), 0.035, g); ball(V(0.0, 0.06, z), 0.045, g); limb(V(0.0, 0.05, z), V(0.0, 0.45, z), 0.042, g); }); }, hip: V(0.0, 0.47, 0), shoulder: V(-0.12, 0.80, 0), head: V(-0.16, 0.92, 0) },
-    stand: { legs: function (g) { [-0.09, 0.09].forEach(function (z) { limb(V(0.0, 0.03, z), V(0.0, 0.30, z), 0.035, g); ball(V(0.0, 0.31, z), 0.045, g); limb(V(0.0, 0.30, z), V(0.02, 0.58, z), 0.042, g); limb(V(-0.08, 0.03, z), V(0.05, 0.03, z), 0.03, g); }); }, hip: V(0.02, 0.60, 0), shoulder: V(-0.16, 0.92, 0), head: V(-0.20, 1.02, 0) }
+    squat: { ankle: [0, 0.04], knee: [-0.13, 0.26], hip: [0.05, 0.30], foot: [-0.10, 0.05], lean0: 25, leanMax: 60 },
+    kneel: { ankle: [0.245, 0.05], knee: [0, 0.05], hip: [0.02, 0.29], foot: [0.245, 0.36], lean0: 20, leanMax: 60 },
+    stand: { ankle: [0, 0.04], knee: [0, 0.27], hip: [0.02, 0.50], foot: [-0.08, 0.07], lean0: 45, leanMax: 80 }
   };
+  var TORSO = 0.30, ARM_KID = 0.40, ARM_ADULT = 0.44, SHOULDER_HALF = 0.11, HAND_Y = C.SAND + 0.10, FEET_BACK = 0.06;
+  function shoulderAt(P, H, leanDeg) { var a = leanDeg * Math.PI / 180; return { x: P.hip[0] * H - TORSO * H * Math.sin(a), y: P.hip[1] * H + TORSO * H * Math.cos(a) }; }
+  function reachAt(P, H, Larm, leanDeg) {
+    // горизонтальный вынос кончиков пальцев за борт при прямой руке, опущенной до высоты HAND_Y
+    var sh = shoulderAt(P, H, leanDeg), drop = sh.y - 0.02 * H - HAND_Y;
+    if (drop >= Larm) return null;
+    return -sh.x + Math.sqrt(Larm * Larm - drop * drop) - FEET_BACK;
+  }
   function buildKid() {
     while (kid.children.length) kid.remove(kid.children[0]);
-    var A = AGES[S.age], s = A.h / 1.10, P = POSES[S.pose], R = A.reach + (S.pose === "stand" ? 0.08 : 0);
+    var A = AGES[S.age], H = A.h, P = POSES[S.pose], adult = S.age === "adult";
+    var Larm = (adult ? ARM_ADULT : ARM_KID) * H, headR = (adult ? 0.062 : 0.07) * H;
+    var leanC = null, Rc = null, Rm = 0, leanM = P.lean0;
+    for (var d = P.lean0; d <= P.leanMax; d += 2) {
+      var r = reachAt(P, H, Larm, d);
+      if (r === null) continue;
+      if (leanC === null) { leanC = d; Rc = r; }
+      if (r > Rm) { Rm = r; leanM = d; }
+    }
+    if (leanC === null) { leanC = P.leanMax; Rc = 0.05; Rm = 0.05; }
+    kidInfo.Rcomf = Math.max(0.05, Rc); kidInfo.Rmax = Math.max(kidInfo.Rcomf, Rm); kidInfo.lean = leanC;
     var g = new THREE.Group(); kid.add(g);
-    P.legs(g);
-    ball(P.hip, 0.08, g); limb(P.hip, P.shoulder, 0.075, g); ball(P.head, 0.085, g);
-    var hand = V(-(R / s) - 0.06 / s, (C.SAND + 0.10) / s, 0);
-    [-0.1, 0.1].forEach(function (z) {
-      var sh = V(P.shoulder.x, P.shoulder.y - 0.02, z), hd = V(hand.x, hand.y, z * 0.6), el = new THREE.Vector3().addVectors(sh, hd).multiplyScalar(0.5); el.y -= 0.06;
-      limb(sh, el, 0.028, g); limb(el, hd, 0.025, g); ball(hd, 0.03, g);
+    [-0.07, 0.07].forEach(function (zf) {
+      var z = zf * H;
+      limb(V(P.ankle[0] * H, P.ankle[1] * H, z), V(P.knee[0] * H, P.knee[1] * H, z), 0.035 * H, g);
+      ball(V(P.knee[0] * H, P.knee[1] * H, z), 0.045 * H, g);
+      limb(V(P.knee[0] * H, P.knee[1] * H, z), V(P.hip[0] * H, P.hip[1] * H, z), 0.045 * H, g);
+      limb(V(P.foot[0] * H, 0.03 * H, z), V(P.foot[1] * H, 0.03 * H, z), 0.03 * H, g);
     });
-    kid.scale.set(s, s, s);
-    if (S.side === "front") { kid.rotation.y = 0; kid.position.set(C.GAP + outD() + 0.06, 0, 0); }
-    else { kid.rotation.y = -Math.PI / 2; kid.position.set(xc(), 0, C.L / 2 + C.PLY + 0.06); }
-    kidInfo.head.copy(P.head).multiplyScalar(s).applyAxisAngle(V(0, 1, 0), kid.rotation.y).add(kid.position);
-    kidInfo.headR = 0.085 * s;
+    var sh = shoulderAt(P, H, leanC), hip = V(P.hip[0] * H, P.hip[1] * H, 0), shV = V(sh.x, sh.y, 0);
+    ball(hip, 0.07 * H, g); limb(hip, shV, 0.065 * H, g);
+    var dir = new THREE.Vector3().subVectors(shV, hip).normalize(), headC = shV.clone().addScaledVector(dir, 0.05 * H + headR);
+    ball(headC, headR, g);
+    var handX = -(kidInfo.Rcomf + FEET_BACK);
+    [-1, 1].forEach(function (side) {
+      var s0 = V(sh.x, sh.y - 0.02 * H, side * SHOULDER_HALF * H), hd = V(handX, HAND_Y, side * 0.06 * H);
+      var el = new THREE.Vector3().addVectors(s0, hd).multiplyScalar(0.5); el.y -= 0.03 * H;
+      limb(s0, el, 0.025 * H, g); limb(el, hd, 0.022 * H, g); ball(hd, 0.03 * H, g);
+    });
+    if (S.side === "front") { kid.rotation.y = 0; kid.position.set(C.GAP + outD() + FEET_BACK, 0, 0); }
+    else { kid.rotation.y = -Math.PI / 2; kid.position.set(xc(), 0, C.L / 2 + C.PLY + FEET_BACK); }
+    kidInfo.head.copy(headC).applyAxisAngle(V(0, 1, 0), kid.rotation.y).add(kid.position);
+    kidInfo.headR = headR;
     var fwd = S.side === "front" ? V(-1, 0, 0) : V(0, 0, -1);
-    kidInfo.eyes.copy(kidInfo.head).addScaledVector(fwd, 0.07 * s); kidInfo.eyes.y += 0.01 * s;
+    kidInfo.eyes.copy(kidInfo.head).addScaledVector(fwd, headR * 0.9); kidInfo.eyes.y += 0.01;
     eyePos.copy(kidInfo.eyes); eyeLook.set(xc(), C.SAND, 0);
   }
 
@@ -337,21 +365,23 @@
   function updateChecks() {
     var A = AGES[S.age], h = kidInfo.head, top = h.y + kidInfo.headR, items = [];
     var bad = reachStats.bad, cls = bad < 0.05 ? "ok" : bad < 0.25 ? "warn" : "bad";
-    items.push([cls, bad < 0.05 ? "достаёт" : bad < 0.25 ? "не везде" : "мало", "<b>Досягаемость песка.</b> Свободно <span class=num>" + pct(reachStats.ok) + "%</span>, на пределе <span class=num>" + pct(reachStats.warn) + "%</span>, не достаёт <span class=num>" + pct(reachStats.bad) + "%</span>." + (reachStats.strip > 0.01 ? " Полоса у стены <span class=num>" + Math.round(reachStats.strip * 100) + " см</span> недоступна с этой стороны." : " Достаёт до самой стены.")]);
+    items.push([cls, bad < 0.05 ? "достаёт" : bad < 0.25 ? "не везде" : "мало", "<b>Досягаемость песка.</b> Прямая рука при наклоне " + kidInfo.lean + "°: <span class=num>" + Math.round(kidInfo.Rcomf * 100) + " см</span> от борта, с наклоном над бортом до <span class=num>" + Math.round(kidInfo.Rmax * 100) + " см</span>. Свободно <span class=num>" + pct(reachStats.ok) + "%</span>, на пределе <span class=num>" + pct(reachStats.warn) + "%</span>, не достаёт <span class=num>" + pct(reachStats.bad) + "%</span>." + (reachStats.strip > 0.01 ? " Полоса у стены <span class=num>" + Math.round(reachStats.strip * 100) + " см</span> недоступна с этой стороны." : " Достаёт до самой стены.")]);
     var t = (C.LENS_Y - h.y) / (C.LENS_Y - C.SAND), bx0 = C.LENS_X + t * (0 - C.LENS_X), bx1 = C.LENS_X + t * (C.IMG_FAR - C.LENS_X), bz = t * C.IMG_HALF;
     var inBeam = h.y < C.LENS_Y && h.x - kidInfo.headR < bx1 && h.x + kidInfo.headR > bx0 && Math.abs(h.z) - kidInfo.headR < bz;
     items.push([inBeam ? "warn" : "ok", inBeam ? "тень" : "чисто", "<b>Голова и луч проектора.</b> " + (inBeam ? "Голова в луче: на песке будет тень от головы. Отодвинуться от борта на 10–15 см." : "Голова вне луча, тени только от рук. Луч на высоте головы заканчивается в <span class=num>" + Math.round(bx1 * 100) + " см</span> от стены.")]);
     var overBox = h.x < xc() + 0.15 && Math.abs(h.z) < 0.2, clr = C.HW_BOTTOM - top;
     var c3 = clr > 0.1 ? "ok" : overBox ? "bad" : "warn";
     items.push([c3, clr > 0.1 ? "запас" : overBox ? "удар" : "внимание", "<b>Зазор до датчика и консоли.</b> Макушка на <span class=num>" + Math.round(top * 100) + " см</span>, низ железа <span class=num>142 см</span>: " + (clr > 0.1 ? "запас " + Math.round(clr * 100) + " см." : overBox ? "голова под консолью, столкновение." : "стоя над центром ящика заденет консоль; у борта — нет.")]);
-    var ty = (C.SENS_Y - h.y), inFov = ty > 0 && Math.abs(h.x - xc()) < ty * Math.tan(THREE.MathUtils.degToRad(30)) + kidInfo.headR && Math.abs(h.z) < ty * Math.tan(THREE.MathUtils.degToRad(35)) + kidInfo.headR;
+    var ty = (C.SENS_Y - h.y), inFov = ty > 0 && Math.abs(h.x - xc()) < ty * Math.tan(THREE.MathUtils.degToRad(30)) + kidInfo.headR && Math.abs(h.z - C.ARM_Z) < ty * Math.tan(THREE.MathUtils.degToRad(35)) + kidInfo.headR;
+    var ta = (C.LENS_Y - 1.50) / (C.LENS_Y - C.SAND), beamZ = ta * C.IMG_HALF, armGap = (C.ARM_Z - 0.02) - beamZ, beamXarm = C.LENS_X + ta * (C.IMG_FAR - C.LENS_X);
+    items.push([armGap > 0.05 ? "ok" : "bad", armGap > 0.05 ? "без тени" : "тень", "<b>Консоль датчика и луч проектора.</b> Консоль сдвинута на <span class=num>" + Math.round(C.ARM_Z * 100) + " см</span> вдоль стены. Луч на её высоте занимает ±<span class=num>" + Math.round(beamZ * 100) + " см</span> от центра и до <span class=num>" + Math.round(beamXarm * 100) + " см</span> от стены: до консоли <span class=num>" + Math.round(armGap * 100) + " см</span>, датчик начинается с <span class=num>" + Math.round((xc() - 0.033) * 100) + " см</span> от стены. Железо луч не режет."]);
     items.push(["ok", inFov ? "в кадре" : "вне", "<b>Датчик.</b> " + (inFov ? "Голова попадает в кадр датчика — это норма: всё вне ящика вырезается маской, руки над песком отсекает фильтр." : "Голова вне кадра датчика. Руки над песком отсекает фильтр.")]);
     var dl = kidInfo.eyes.distanceTo(new THREE.Vector3(C.LENS_X, C.LENS_Y, 0));
     items.push([inBeam ? "warn" : "ok", inBeam ? "ярко" : "не слепит", "<b>Глаза и проектор.</b> Объектив в <span class=num>" + dl.toFixed(1) + " м</span> над стеной. " + (inBeam ? "Глаза внутри светового конуса — ярко, если поднять взгляд." : "Глаза вне светового конуса: посмотрев вверх, ребёнок увидит лампу как яркую точку, но луч в глаза не попадает.")]);
     var front = Math.floor((C.L + 2 * C.PLY) / 0.5), ends = 2;
     items.push(["ok", "до " + (front + ends), "<b>Сколько детей.</b> Спереди <span class=num>" + front + "</span>, по одному с торцов. Свободная зона вокруг ящика 0,6 м с трёх сторон: пятно на полу <span class=num>" + (C.L + 2 * C.PLY + 1.2).toFixed(1) + " × " + (outD() + 0.6).toFixed(1) + " м</span>."]);
     document.getElementById("checks").innerHTML = items.map(function (it) { return "<li>" + chip(it[0], it[1]) + "<span>" + it[2] + "</span></li>"; }).join("");
-    document.getElementById("hint").innerHTML = "центр ящика " + Math.round(xc() * 1000) + " мм от стены<br>датчик 1,45 м · объектив 1,95 м<br>низ железа 1,42 м · " + A.name + ", " + { squat: "на корточках", kneel: "на коленях", stand: "стоя" }[S.pose];
+    document.getElementById("hint").innerHTML = "центр ящика " + Math.round(xc() * 1000) + " мм от стены<br>датчик 1,45 м, консоль +30 см вдоль стены<br>объектив 1,95 м · низ железа 1,42 м · " + A.name + ", " + { squat: "на корточках", kneel: "на коленях", stand: "стоя" }[S.pose];
   }
 
   // ---------- камера
@@ -374,7 +404,7 @@
   canvas.addEventListener("touchmove", function (e) { if (e.touches.length === 2 && pinch) { var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); orbit.r = Math.max(1.2, Math.min(7, orbit.r * pinch / d)); goal.r = orbit.r; pinch = d; } }, { passive: true });
 
   // ---------- управление
-  function rebuildAll() { buildArm(); buildBox(); buildFov(); buildKid(); target.x = xc(); updateChecks(); }
+  function rebuildAll() { buildArm(); buildKid(); buildBox(); buildFov(); target.x = xc(); updateChecks(); }
   ["age", "pose", "side", "depth"].forEach(function (id) {
     document.getElementById(id).addEventListener("change", function (e) {
       S[id] = id === "depth" ? parseFloat(e.target.value) : e.target.value;
