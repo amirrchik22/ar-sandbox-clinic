@@ -743,3 +743,70 @@ input[type="range"] {
 }
 
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+/* --------------------------------------------------------------------------
+   Ноутбук: широкий и низкий экран.
+   Телефонная колонка на ноутбуке растягивалась в страницу высотой 2538 точек,
+   и главные кнопки — режимы, пауза, заморозка, «Завершить занятие» — уходили
+   ниже края. Проверено 24.09 на 1280×800, 1366×768, 1440×900, 1512×982,
+   1920×1080. На широком экране раскладываем в две колонки: слева то, на что
+   смотрят (картинка и состояние), справа то, что нажимают.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 1000px) {
+  .wrap { max-width: 1240px; }   /* отступ под нижнюю панель остаётся прежним */
+
+  #screen-now {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  /* До занятия: слева выбор, кто ведёт и с кем; справа картинка,
+     чтобы сразу было видно, что датчик показывает. */
+  #screen-now {
+    grid-template-areas:
+      "head    head"
+      "pick    preview"
+      "place   preview"
+      "state   screens";
+  }
+
+  /* Во время занятия: слева картинка, справа всё, что нажимают. */
+  body.running #screen-now {
+    grid-template-areas:
+      "head    head"
+      "preview controls"
+      "preview place"
+      "state   screens";
+  }
+  #screen-now > .card { margin-bottom: 0; }
+  #liveHead      { grid-area: head; }
+  #pickCard      { grid-area: pick; }
+  #previewCard   { grid-area: preview; }
+  #liveControls  { grid-area: controls; }
+  #placeCard     { grid-area: place; }
+  #stateCard     { grid-area: state; }
+  #screensCard   { grid-area: screens; }
+
+  /* на широкой карточке подпись и значение не должны разъезжаться по краям */
+  #placeCard .lab, #liveControls .lab { max-width: 430px; }
+
+  /* экраны «Дети» и «Записи» тоже не должны быть узкой лентой */
+  #screen-kids, #screen-media { max-width: 1240px; }
+}
+
+/* Низкий экран ноутбука (768–900 точек): ужимаем отступы, чтобы главное
+   помещалось без прокрутки. */
+@media (min-width: 1000px) and (max-height: 900px) {
+  .wrap { padding-top: 8px; }
+  header { padding: 2px 0 8px; }
+  header h1 { font-size: 18px; }
+  .card { padding: 12px; border-radius: 13px; }
+  .card h2 { font-size: 15px; margin-bottom: 7px; }
+  #screen-now { gap: 10px; }
+  #timer { font-size: 40px; }
+  .hint { font-size: 13px; margin-top: 6px; }
+}

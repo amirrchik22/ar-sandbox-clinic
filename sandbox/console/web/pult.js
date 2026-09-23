@@ -1020,6 +1020,9 @@ function render(raw) {
 
   el('liveHead').hidden = !running;
   el('liveControls').hidden = !running;
+  // Признак для раскладки: на ноутбуке до занятия и во время него удобны
+  // разные расстановки карточек (см. style.css, блок «Ноутбук»).
+  document.body.classList.toggle('running', !!running);
   el('pickCard').hidden = running;
 
   if (running) {
