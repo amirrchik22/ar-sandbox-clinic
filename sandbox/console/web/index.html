@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23111820%27/%3E%3Cpath d=%27M4 22c4-6 8-6 12 0s8 6 12 0%27 stroke=%27%23d8cb98%27 stroke-width=%273%27 fill=%27none%27/%3E%3Cpath d=%27M4 14c4-6 8-6 12 0s8 6 12 0%27 stroke=%27%2349a8c0%27 stroke-width=%272%27 fill=%27none%27/%3E%3C/svg%3E">
+<title>Пульт — AR-песочница</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1 id="screenTitle">Сейчас</h1>
+    <span class="badge" id="badge">соединяюсь…</span>
+  </header>
+
+  <!-- ================= ЭКРАН «СЕЙЧАС» ================= -->
+  <main class="screen" id="screen-now" role="tabpanel" aria-labelledby="tab-now">
+
+    <!-- идёт занятие: таймер и кто с кем -->
+    <section class="card" id="liveHead" hidden>
+      <div class="timer" id="timer">00:00</div>
+      <div class="who" id="who"></div>
+    </section>
+
+    <!-- занятия нет: выбор одним касанием -->
+    <section class="card" id="pickCard">
+      <h2>Кто ведёт занятие</h2>
+      <div class="people" id="staffList"></div>
+      <form class="adder" id="staffAdder" hidden>
+        <input type="text" id="staffName" placeholder="Имя специалиста" autocomplete="off" maxlength="40">
+        <div class="buttons">
+          <button type="button" class="ghost" id="staffCancel">Отмена</button>
+          <button type="submit" class="green">Сохранить</button>
+        </div>
+      </form>
+
+      <h2 class="mt">С кем занимаемся</h2>
+      <div class="people" id="childList"></div>
+      <form class="adder" id="childAdder" hidden>
+        <input type="text" id="childAlias" placeholder="Условное имя, например «Сова»" autocomplete="off" maxlength="40">
+        <div class="buttons">
+          <button type="button" class="ghost" id="childCancel">Отмена</button>
+          <button type="submit" class="green">Сохранить</button>
+        </div>
+      </form>
+
+      <p class="hint" id="pickHint">Имена детей не записываем — только условное имя, которое
+        придумывает специалист.</p>
+      <button class="huge green row1" id="btnStart" disabled>Начать занятие</button>
+    </section>
+
+    <!-- живой предпросмотр: виден всегда, чтобы навести ящик и до занятия -->
+    <section class="card">
+      <h2>Что сейчас на песке</h2>
+      <div class="preview" id="preview">
+        <div class="veil" id="previewVeil" hidden>ПАУЗА · проекция погашена</div>
+        <div class="chip" id="previewChip" hidden>Заморозка</div>
+      </div>
+      <p class="hint" id="viewStats">Жду первый кадр…</p>
+    </section>
+
+    <!-- идёт занятие: режимы и кнопки -->
+    <section class="card" id="liveControls" hidden>
+      <h2>Режим</h2>
+      <div class="modes" id="modes"></div>
+
+      <div class="toggles">
+        <button class="toggle pause" id="btnPause" aria-pressed="false">
+          Пауза
+          <span class="state" id="pauseState">выключена</span>
+        </button>
+        <button class="toggle freeze" id="btnFreeze" aria-pressed="false">
+          Заморозка
+          <span class="state" id="freezeState">выключена</span>
+        </button>
+      </div>
+
+      <div class="row2 stack">
+        <button id="btnSnap">Снимок</button>
+        <button id="btnRecord" hidden>Записать видео</button>
+      </div>
+      <div class="row2 stack">
+        <button id="btnCalib">Запомнить ровный песок</button>
+        <button class="red" id="btnStop">Завершить занятие</button>
+      </div>
+
+      <details class="fine">
+        <summary>Мелкие настройки</summary>
+        <div class="body">
+          <div class="field">
+            <div class="lab"><span>Яркость проекции</span><b id="brightVal">100 %</b></div>
+            <input type="range" id="bright" min="30" max="100" step="5" value="100">
+          </div>
+          <div class="field">
+            <div class="lab"><span>Линии высоты</span><b id="stepVal">—</b></div>
+            <div class="choices" id="steps"></div>
+            <p class="hint">Через сколько миллиметров подъёма рисовать линию.
+              «Авто» — шаг подбирается сам под то, что насыпано.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Экраны</h2>
+      <p class="hint" style="margin-top:0">Страницу проекции открывают на компьютере,
+        к которому подключён проектор, и разворачивают на весь экран.</p>
+      <a class="addr" id="projectorUrl" href="/projector" target="_blank" rel="noopener">/projector</a>
+      <button id="btnProjector">Открыть страницу проекции</button>
+      <p class="hint">Пульт с телефона — этот адрес или QR-код:</p>
+      <a class="addr" id="consoleUrl" href="/">…</a>
+      <div class="qr">
+        <img id="qr" src="/qr.svg" alt="QR-код на адрес пульта">
+        <span class="hint">Наведите камеру телефона — откроется этот же пульт.
+          Телефон должен быть в той же сети Wi-Fi.</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Состояние</h2>
+      <ul class="facts" id="facts"></ul>
+    </section>
+  </main>
+
+  <!-- ================= ЭКРАН «ДЕТИ» ================= -->
+  <main class="screen" id="screen-kids" role="tabpanel" aria-labelledby="tab-kids" hidden>
+    <section class="card">
+      <h2>Карточки детей</h2>
+      <p class="hint" style="margin-top:0">Только условные имена. Выбрали ребёнка на
+        экране «Сейчас» — его настройки применяются сами.</p>
+      <p class="note-server" id="kidsOffline" hidden></p>
+      <button class="small" id="kidsRetry" hidden>Проверить ещё раз</button>
+      <div id="kidsList"></div>
+      <p class="empty" id="kidsEmpty" hidden>Карточек пока нет. Добавьте первую.</p>
+      <form class="adder" id="kidAdder" hidden>
+        <input type="text" id="kidAlias" placeholder="Условное имя, например «Сова»" autocomplete="off" maxlength="40">
+        <div class="buttons">
+          <button type="button" class="ghost" id="kidCancel">Отмена</button>
+          <button type="submit" class="green">Сохранить</button>
+        </div>
+      </form>
+      <button class="row1" id="btnAddKid">Добавить ребёнка</button>
+    </section>
+  </main>
+
+  <!-- ================= ЭКРАН «ЗАПИСИ» ================= -->
+  <main class="screen" id="screen-media" role="tabpanel" aria-labelledby="tab-media" hidden>
+    <section class="card" id="sessionsCard">
+      <h2>Прошлые занятия</h2>
+      <p class="note-server" id="mediaOffline" hidden></p>
+      <button class="small" id="mediaRetry" hidden>Проверить ещё раз</button>
+      <div id="sessionsList"></div>
+      <p class="empty" id="sessionsEmpty" hidden>Занятий пока нет. Они появятся здесь,
+        как только первое завершится.</p>
+    </section>
+
+    <section class="card" id="reportCard" hidden>
+      <div class="report-head">
+        <div>
+          <div class="who2" id="reportWho">Занятие</div>
+          <div class="when" id="reportWhen"></div>
+        </div>
+        <button class="ghost" id="btnBackToList">Назад</button>
+      </div>
+
+      <ul class="facts" id="reportFacts"></ul>
+
+      <h2 class="mt">Как менялся ландшафт</h2>
+      <div class="three" id="reportThree"></div>
+
+      <h2 class="mt">Заметка специалиста</h2>
+      <textarea id="reportNote" placeholder="Что получилось на занятии, что показать родителю"></textarea>
+      <button class="row1" id="btnSaveNote">Сохранить заметку</button>
+
+      <h2 class="mt">Снимки и видео занятия</h2>
+      <div class="media" id="reportMedia"></div>
+      <p class="empty" id="reportMediaEmpty" hidden>Записей этого занятия нет.</p>
+    </section>
+  </main>
+
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Экраны пульта">
+  <button id="tab-now" role="tab" aria-selected="true" aria-controls="screen-now" data-screen="now">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M2 15c3-5 5-5 8 0s5 5 8 0"></path>
+      <path d="M2 9c3-5 5-5 8 0s5 5 8 0"></path>
+    </svg>
+    <span>Сейчас</span><span class="dot"></span>
+  </button>
+  <button id="tab-kids" role="tab" aria-selected="false" aria-controls="screen-kids" data-screen="kids">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.5"></circle>
+      <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"></path>
+    </svg>
+    <span>Дети</span><span class="dot"></span>
+  </button>
+  <button id="tab-media" role="tab" aria-selected="false" aria-controls="screen-media" data-screen="media">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
+      <path d="M3 15l5-4 4 3 3-2 6 4"></path>
+      <circle cx="8.5" cy="9.5" r="1.3"></circle>
+    </svg>
+    <span>Записи</span><span class="dot"></span>
+  </button>
+</nav>
+
+<div id="toast"></div>
+<script src="/static/live.js"></script>
+<script src="/static/pult.js"></script>
+</body>
+</html>
