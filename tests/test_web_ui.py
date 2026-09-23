@@ -25,7 +25,7 @@ CONTRACT = (
     "/api/state", "/api/people", "/api/session/start", "/api/session/stop",
     "/api/mode", "/api/pause", "/api/freeze", "/api/calibrate", "/api/snapshot",
     "/api/sessions", "/api/media", "/api/record", "/api/record/start", "/api/record/stop",
-    "/api/settings", "/media/", "/openapi.json",
+    "/api/settings", "/api/placement", "/media/", "/openapi.json",
 )
 
 
@@ -182,3 +182,11 @@ def test_имена_детей_только_условные():
     assert "Имена детей не записываем" in INDEX or "Имена детей не записываем" in PULT
     # в отчёте формулировка занятия без медицинских заявлений
     assert "развивающее и коррекционное" in PULT
+
+
+def test_переключатель_размещения_на_месте():
+    """Настольный режим: песочницы ещё нет, программа должна работать на столе."""
+    assert 'id="places"' in INDEX, "пропал выбор, где стоит датчик"
+    assert 'id="placeVal"' in INDEX and 'id="placeHint"' in INDEX
+    assert "buildPlaces" in PULT, "пульт не рисует кнопки размещения"
+    assert "/api/placement" in PULT, "пульт не шлёт выбор размещения на сервер"

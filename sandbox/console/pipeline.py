@@ -70,6 +70,33 @@ class ModeProfile:
     paint: str = ""          # своя раскраска вместо палитры: two | water
 
 
+# --- Где стоит датчик -------------------------------------------------------
+#
+# Песочницы у заказчика пока нет, поэтому программа должна работать и на столе:
+# датчик на стопке книг, под ним любая поверхность, проектор не нужен — картинку
+# смотрят на экране ноутбука. Отличия только в двух вещах: какую часть кадра
+# считать рабочей зоной и какой перепад высот считать разумным.
+@dataclass(frozen=True)
+class PlacementProfile:
+    title: str
+    hint: str
+    roi_margin: float        # какую долю кадра отрезать с каждой стороны
+    max_spread_mm: float     # больше этого перепада — значит в кадр лезет лишнее
+    min_span_mm: float       # меньше этого размаха палитру не сжимаем
+
+PLACEMENTS: dict[str, PlacementProfile] = {
+    "sandbox": PlacementProfile(
+        title="Над песочницей",
+        hint="датчик на консоли над ящиком, картинка идёт на проектор",
+        roi_margin=0.125, max_spread_mm=320.0, min_span_mm=25.0),
+    "table": PlacementProfile(
+        title="На столе",
+        hint="датчик на стопке книг над столом, проектор не нужен — смотрите на экране",
+        roi_margin=0.22, max_spread_mm=200.0, min_span_mm=15.0),
+}
+DEFAULT_PLACEMENT = "sandbox"
+
+
 MODE_PROFILES: dict[str, ModeProfile] = {
     # Классическая топография: вода — берег — луг — холмы — снег, линии высоты.
     "map": ModeProfile(palette="topo", smoothing_alpha=0.45, contour_lines=12,
@@ -205,6 +232,8 @@ class FrameServer:
         self._settings = HeightmapSettings(palette=MODE_PROFILES[DEFAULT_MODE].palette,
                                            contour_step_mm=0.0)
         self._proc = HeightmapProcessor(self._settings)
+        self._placement = DEFAULT_PLACEMENT      # где стоит датчик: над ящиком или на столе
+        self._shape: tuple[int, int] | None = None
 
         # Режим, пауза, заморозка, яркость — всё, чем специалист управляет одним
         # нажатием прямо во время занятия.
@@ -257,6 +286,20 @@ class FrameServer:
         with self._lock:
             self._palette_override = name
             self._settings.palette = name
+
+    def set_placement(self, name: str) -> str:
+        """Переключить, где стоит датчик: над песочницей или на столе."""
+        if name not in PLACEMENTS:
+            raise ValueError(f"неизвестное размещение: {name}")
+        prof = PLACEMENTS[name]
+        with self._lock:
+            self._placement = name
+            self._settings.max_spread_mm = prof.max_spread_mm
+            self._settings.min_span_mm = prof.min_span_mm
+            shape, demo = self._shape, self._demo
+        if shape and not demo:
+            self._proc.roi = center_roi(shape, margin=prof.roi_margin)
+        return name
 
     def set_contour_step(self, step_mm: int) -> None:
         if step_mm not in CONTOUR_VALUES:
@@ -362,6 +405,10 @@ class FrameServer:
                 "calibrated_at": self._calibrated_at,
                 "mode": self._mode,
                 "mode_title": MODE_TITLES.get(self._mode, self._mode),
+                "placement": self._placement,
+                "placement_title": PLACEMENTS[self._placement].title,
+                "placements": [{"id": k, "title": v.title, "hint": v.hint}
+                               for k, v in PLACEMENTS.items()],
                 "paused": self._paused,
                 "frozen": self._frozen,
                 "brightness": self._brightness,
@@ -510,8 +557,11 @@ class FrameServer:
             self._sensor_error = why
         # Рабочая зона: у настоящего датчика в кадр попадают пол, стена и борта —
         # берём середину кадра. На демо-рельефе песок занимает весь кадр.
-        self._proc.roi = None if demo else center_roi((sensor.intrinsics().height,
-                                                       sensor.intrinsics().width))
+        shape = (sensor.intrinsics().height, sensor.intrinsics().width)
+        with self._lock:
+            self._shape = shape
+            margin = PLACEMENTS[self._placement].roi_margin
+        self._proc.roi = None if demo else center_roi(shape, margin=margin)
         self._load_profile()
 
         t_prev = time.monotonic()

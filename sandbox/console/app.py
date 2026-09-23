@@ -323,6 +323,9 @@ def api_state(request: Request) -> dict:
         "modes": MODES,
         "paused": view["paused"],
         "frozen": view["frozen"],
+        "placement": view.get("placement"),
+        "placement_title": view.get("placement_title"),
+        "placements": view.get("placements", []),
         "brightness": view["brightness"],
         "sensor": {"title": view["sensor"], "demo": view["demo"], "opening": view["opening"],
                    "error": view["sensor_error"], "fps": view["fps"]},
@@ -529,6 +532,18 @@ class ViewSettings(BaseModel):
     palette: str | None = None
     contour_step_mm: int | None = None
     brightness: int | None = None
+
+
+class PlacementBody(BaseModel):
+    """Где стоит датчик: sandbox — над ящиком, table — на столе."""
+    placement: str
+
+
+@app.post("/api/placement")
+def api_placement(body: PlacementBody) -> dict:
+    name = guard(CONSOLE.frames.set_placement, body.placement)
+    CONSOLE.log("placement", name)
+    return {"ok": True, "placement": name, "state": CONSOLE.frames.state()}
 
 
 @app.post("/api/settings")

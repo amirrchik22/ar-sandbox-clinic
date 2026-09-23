@@ -453,6 +453,29 @@ function buildSteps(list) {
   });
 }
 
+function buildPlaces(list) {
+  const box = el('places');
+  if (!box) return;
+  const places = (list && list.length) ? list : [];
+  const signature = places.map((p) => p.id).join(',');
+  if (box.dataset.built === signature) return;
+  box.dataset.built = signature;
+  box.innerHTML = '';
+  places.forEach((p) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.place = p.id;
+    b.textContent = p.title;
+    b.title = p.hint || '';
+    b.onclick = async () => {
+      const r = await api('POST', '/api/placement', { placement: p.id });
+      if (r.ok) { toast(p.title); refresh(); }
+      else if (fail(r, true) === 'нет') toast(SOON);
+    };
+    box.appendChild(b);
+  });
+}
+
 async function setBrightness(value, quiet) {
   localBright = value;
   el('bright').value = String(value);
@@ -983,6 +1006,7 @@ function render(raw) {
 
   loadPeople();
   buildSteps(raw.contour_steps);
+  buildPlaces(raw.placements);
 
   const badge = el('badge');
   badge.textContent = view.opening ? 'ищу датчик…' : (view.demo ? 'демо-режим' : 'датчик работает');
@@ -1007,7 +1031,7 @@ function render(raw) {
     const a = document.createElement('b');
     a.textContent = staffName;
     who.appendChild(a);
-    who.appendChild(document.createTextNode(' · занимаемся с '));
+    who.appendChild(document.createTextNode(' · ребёнок: '));
     const b = document.createElement('b');
     b.textContent = childAlias;
     who.appendChild(b);
@@ -1025,6 +1049,17 @@ function render(raw) {
   el('btnRecord').className = recording ? 'red' : '';
 
   const step = view.contour_step_mm;
+  const place = raw.placement;
+  const placeVal = el('placeVal');
+  if (placeVal) placeVal.textContent = raw.placement_title || '—';
+  document.querySelectorAll('#places button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.place === place);
+  });
+  const placeHint = el('placeHint');
+  if (placeHint && Array.isArray(raw.placements)) {
+    const cur = raw.placements.find((p) => p.id === place);
+    if (cur && cur.hint) placeHint.textContent = cur.hint;
+  }
   el('stepVal').textContent = step === 0 ? 'Авто' : (step != null ? step + ' мм' : '—');
   document.querySelectorAll('#steps button').forEach((b) => {
     b.classList.toggle('on', Number(b.dataset.step) === Number(step));
