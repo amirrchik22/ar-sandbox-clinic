@@ -8,12 +8,16 @@ python tools/draw_wall.py            # пишет docs/img/wall-placement.svg и
 import math, pathlib
 
 P = dict(
-    GAP=0.020, PLY=0.018, D=0.800, L=1.200, WALL_H=0.300, SAND=0.198,
-    SAND_LAYER=0.180,                   # слой песка; поверхность песка = PLY + SAND_LAYER
-    SENS_ABOVE=1.252, FOV=(70, 60), SENS_RES=512, SENS_NAME="Kinect v2",
+    # Решение заказчика 24.09: все размеры ящика — ВНУТРЕННИЕ. Толщину материала
+    # (фанера, доска — что найдётся) в расчёт не берём: конструкция от неё не
+    # зависит, а путаницы от двух наборов чисел много. PLY оставлен только для
+    # рисования стенок на чертеже, в геометрию он не входит.
+    GAP=0.020, PLY=0.0, DRAW_PLY=0.016, D=0.800, L=1.200, WALL_H=0.300, SAND=0.180,
+    SAND_LAYER=0.180,                   # слой песка; он же высота поверхности от пола
+    SENS_ABOVE=1.270, FOV=(70, 60), SENS_RES=512, SENS_NAME="Kinect v2",
     SENS_X=0.450, SENS_BODY=0.067,      # ось датчика от стены (X) и глубина корпуса, м — вынос фиксирован, от размера ящика не зависит
     ARM_Y=0.30,                         # вынос консоли вдоль стены (Y), м
-    THROW=1.413, W_IMG=1.24, OFFSET=1.0, X_LENS=0.08,
+    THROW=1.416, W_IMG=1.25, OFFSET=1.0, X_LENS=0.08,
 )
 OUT = pathlib.Path(__file__).resolve().parents[1] / "docs" / "img"
 
@@ -66,9 +70,9 @@ def side_view(p, g):
     a(f'<line x1="{sc[0]:.1f}" y1="{sc[1]:.1f}" x2="{X(g["cov_x1"]):.1f}" y2="{Y(p["SAND"]):.1f}" stroke="#1a8c9c" stroke-width="1.3" stroke-dasharray="5 3"/>')
     bx0, bx1 = X(p["GAP"]), X(p["GAP"] + g["OUT_D"])
     a(f'<path d="M{X(p["GAP"]+p["PLY"]):.1f} {Y(p["PLY"]):.1f} V{Y(p["SAND"]):.1f} Q{X(p["GAP"]+0.2):.1f} {Y(p["SAND"]+0.03):.1f} {X(p["GAP"]+0.35):.1f} {Y(p["SAND"]):.1f} T{X(p["GAP"]+0.6):.1f} {Y(p["SAND"]-0.01):.1f} T{X(p["GAP"]+g["OUT_D"]-p["PLY"]):.1f} {Y(p["SAND"]):.1f} V{Y(p["PLY"]):.1f} Z" fill="#d9c79a"/>')
-    a(f'<rect x="{bx0:.1f}" y="{Y(p["PLY"]):.1f}" width="{g["OUT_D"]*S:.1f}" height="{p["PLY"]*S:.1f}" fill="#8a6a45"/>')
-    a(f'<rect x="{bx0:.1f}" y="{Y(g["BOX_TOP"]):.1f}" width="{p["PLY"]*S:.1f}" height="{p["WALL_H"]*S:.1f}" fill="#8a6a45"/>')
-    a(f'<rect x="{bx1-p["PLY"]*S:.1f}" y="{Y(g["BOX_TOP"]):.1f}" width="{p["PLY"]*S:.1f}" height="{p["WALL_H"]*S:.1f}" fill="#8a6a45"/>')
+    a(f'<rect x="{bx0:.1f}" y="{Y(0):.1f}" width="{g["OUT_D"]*S:.1f}" height="{p["DRAW_PLY"]*S:.1f}" fill="#8a6a45"/>')
+    a(f'<rect x="{bx0-p["DRAW_PLY"]*S:.1f}" y="{Y(g["BOX_TOP"]):.1f}" width="{p["DRAW_PLY"]*S:.1f}" height="{p["WALL_H"]*S:.1f}" fill="#8a6a45"/>')
+    a(f'<rect x="{bx1:.1f}" y="{Y(g["BOX_TOP"]):.1f}" width="{p["DRAW_PLY"]*S:.1f}" height="{p["WALL_H"]*S:.1f}" fill="#8a6a45"/>')
     fx = X(p["GAP"] + g["OUT_D"] + 0.10); k = S / 130.0
     Pt = lambda dx, dz: f"{fx+dx*k:.1f} {Y0-dz*k:.1f}"
     a(f'<circle cx="{fx+2*k:.1f}" cy="{Y0-80*k:.1f}" r="{10.5*k:.1f}" fill="#9aa5b1"/>')
@@ -94,12 +98,12 @@ def side_view(p, g):
     vdim(580, p["SAND"], g["SENS_Z"], f"датчик {p['SENS_ABOVE']:.2f} м над песком")
     vdim(612, p["SAND"], g["LENS_Z"], f"объектив {g['DIST']:.2f} м над песком")
     vdim(644, 0, g["LENS_Z"], f"объектив {g['LENS_Z']:.2f} м от пола")
-    vdim(676, 0, p["SAND"], "песок 0,15")
+    vdim(676, 0, p["SAND"], f"песок {p['SAND_LAYER']*1000:.0f} мм")
     for xm in (0.0, p["X_LENS"], g["XC"], p["SENS_X"], g["far"], p["GAP"] + g["OUT_D"]):
         a(f'<line x1="{X(xm):.1f}" y1="{Y0+14}" x2="{X(xm):.1f}" y2="{Y0+70}" stroke="#5d6771" stroke-dasharray="2 3" opacity="0.6"/>')
     hline(Y0 + 30, 0, g["far"], f"картинка на песке от 0 до {g['far']*1000:.0f} мм от стены (вдоль стены {p['W_IMG']:.1f} м)", X(g["far"]) + 8)
     hline(Y0 + 48, 0, p["SENS_X"], f"ось датчика {p['SENS_X']*1000:.0f} мм от стены — фиксированно, от размера ящика не зависит; край луча здесь {g['beam_x_sens']*1000:.0f} мм", X(p["SENS_X"]) + 8)
-    hline(Y0 + 66, 0, p["X_LENS"], f"объектив {p['X_LENS']*1000:.0f} мм от стены; ящик снаружи {p['GAP']*1000:.0f}…{(p['GAP']+g['OUT_D'])*1000:.0f} мм (центр {g['XC']*1000:.0f} мм), зазор под плинтус {p['GAP']*1000:.0f} мм", X(p["X_LENS"]) + 8)
+    hline(Y0 + 66, 0, p["X_LENS"], f"объектив {p['X_LENS']*1000:.0f} мм от стены; песок {p['GAP']*1000:.0f}…{(p['GAP']+g['OUT_D'])*1000:.0f} мм от стены (центр {g['XC']*1000:.0f} мм), зазор под плинтус {p['GAP']*1000:.0f} мм", X(p["X_LENS"]) + 8)
     a(f'<text x="{X0-18}" y="{Y0+100}" fill="#1d232a" font-size="11">Вид сбоку, один масштаб по осям. Стена слева, ребёнок у переднего борта. Размеры от плоскости стены и от пола, мм.</text>')
     HALO = 'stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke"'
     lbl = lambda x, y, t: a(f'<text x="{x:.1f}" y="{y:.1f}" fill="#1d232a" font-size="11" {HALO}>{t}</text>')
@@ -113,7 +117,7 @@ def side_view(p, g):
     lbl(X(p["SENS_X"]) + 48, Y(g["SENS_Z"]) - 6, f"грань корпуса {g['sens_face']*1000:.0f} мм, край луча {g['beam_x_sens']*1000:.0f} мм — запас {g['gap_sens']*1000:.0f} мм, тени нет")
     lbl(X(p["GAP"] + g["OUT_D"]) + 24, Y(0.82), "ребёнок 5 лет у переднего борта:")
     lbl(X(p["GAP"] + g["OUT_D"]) + 24, Y(0.77), "голова вне луча проектора, тени только от рук")
-    lbl(X0 + 8, Y(0.42), "ящик на полу: борт 250, фанера 18, песок 150 от пола")
+    lbl(X0 + 8, Y(0.42), f"ящик на полу, размеры внутренние: {p['L']*1000:.0f}×{p['D']*1000:.0f}, борт {p['WALL_H']*1000:.0f}, песок {p['SAND_LAYER']*1000:.0f}")
     lbl(X0 + 8, Y(0.365), "кабель-канал 40×25 рядом с рейкой, вниз к тумбе с ПК")
     a('</svg>')
     return "\n".join(o)
@@ -164,7 +168,7 @@ def top_view(p, g):
         for x in (x1, x2): a(f'<line x1="{Xp-4:.1f}" y1="{py(x):.1f}" x2="{Xp+4:.1f}" y2="{py(x):.1f}" stroke="#5d6771"/>')
         a(f'<text transform="translate({Xp-5:.1f} {py((x1+x2)/2):.1f}) rotate(-90)" text-anchor="middle" fill="#5d6771" font-size="10.5" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">{label}</text>')
     hdim(1.30, -p["W_IMG"]/2, p["W_IMG"]/2, f"картинка проектора {p['W_IMG']*1000:.0f} мм")
-    hdim(1.39, -OUT_L/2, OUT_L/2, f"ящик снаружи {OUT_L*1000:.0f} мм")
+    hdim(1.39, -OUT_L/2, OUT_L/2, f"ящик {OUT_L*1000:.0f} мм (внутренний размер)")
     hdim(1.48, -g["hz"], g["hz"], f"поле датчика {g['cov_l']*1000:.0f} мм")
     hdim(1.57, 0, ARM_Y, f"консоль +{ARM_Y*1000:.0f} мм от центра, поперечина обратно к Y = 0")
     vdim(-0.58, 0, XC, f"центр ящика {XC*1000:.0f}")

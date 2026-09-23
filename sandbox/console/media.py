@@ -16,6 +16,14 @@
         video_001.mp4            следующий сегмент
         video.frames/            если ffmpeg не нашёлся — кадры по одному
         video.log                честный журнал записи
+        camera-153012_000.mp4    видео с цветной камеры — только если его включили
+
+Про камеру. У датчика есть цветная камера, 1920x1080 и тридцать кадров в
+секунду. По умолчанию с неё не пишется ничего: в кадр попадает лицо ребёнка, а
+это персональные данные несовершеннолетнего. Режим выбирает клиника — ручка
+/api/record/camera, три значения: «выключено» (по умолчанию), «только ящик»
+(обрезано по рабочей зоне, лицо в кадр не попадает) и «полностью». Выбор
+хранится в data/camera-record.json и переживает перезапуск.
 
 Идентификатор записи считается из её пути (blake2s, 12 знаков): один и тот же
 файл всегда получает один и тот же адрес, даже после перезапуска программы, а
@@ -27,6 +35,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import shutil
 import threading
@@ -34,11 +43,15 @@ import time
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
-from sandbox.recorder.main import LandscapeRecorder
-from sandbox.recorder.video import FRAMES_SUFFIX, ffmpeg_path, ffmpeg_version
+from sandbox.recorder.main import CameraRecorder, LandscapeRecorder
+from sandbox.recorder.video import (CAMERA_BOX, CAMERA_MODES, CAMERA_NOTES,
+                                    CAMERA_OFF, CAMERA_TITLES, CAMERA_WARNING,
+                                    FRAMES_SUFFIX, camera_jpeg, camera_zone,
+                                    ffmpeg_path, ffmpeg_version,
+                                    normalize_camera_mode, normalize_zone)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -59,6 +72,14 @@ KINDS = {
 
 KIND_TITLES = {"snapshot": "Снимок", "video": "Видео", "frames": "Видео (кадры)",
                "heightmap": "Рельеф"}
+
+# Записи с камеры называются иначе: специалист должен с одного взгляда видеть,
+# где ландшафт, а где живая съёмка.
+CAMERA_PREFIX = "camera-"
+CAMERA_KIND_TITLES = {"video": "Камера", "frames": "Камера (кадры)"}
+
+# Где хранится выбор клиники: режим записи с камеры и рабочая зона.
+CAMERA_SETTINGS_FILE = "camera-record.json"
 
 # Сколько кадров серии смотрим, чтобы посчитать её размер (чтобы не подвисать).
 FRAMES_SCAN_LIMIT = 20000
@@ -98,6 +119,12 @@ class RecordBody(BaseModel):
     fps: int | None = None
 
 
+class CameraBody(BaseModel):
+    """Выбор режима записи с цветной камеры и, если нужно, рабочей зоны."""
+    mode: str | None = None
+    zone: list[float] | None = None
+
+
 # --------------------------------------------------------------- хранилище
 
 class MediaLibrary:
@@ -110,6 +137,10 @@ class MediaLibrary:
         self._session_id = None                 # функция «какое занятие идёт сейчас»
         self._recorder: LandscapeRecorder | None = None
         self._last_record: dict | None = None
+        self._camera = None                     # источник цветных кадров (датчик)
+        self._camera_rec: CameraRecorder | None = None
+        self._camera_settings: dict | None = None   # прочитанный выбор клиники
+        self._camera_settings_from: Path | None = None
         self._lock = threading.Lock()
         # Короткий кэш обхода папок: страница библиотеки просит сразу десятки
         # миниатюр, незачем перечитывать диск на каждую картинку.
@@ -146,16 +177,19 @@ class MediaLibrary:
     # ---------- подключение к пульту ----------
 
     def configure(self, frames=None, session_id=None, root: Path | None = None,
-                  data_dir: Path | None = None) -> None:
+                  data_dir: Path | None = None, camera=None) -> None:
         """Пульт передаёт сюда конвейер кадров и способ узнать текущее занятие."""
         if frames is not None:
             self._frames = frames
         if session_id is not None:
             self._session_id = session_id
+        if camera is not None:
+            self._camera = camera
         if root is not None:
             self._root = Path(root)
         if data_dir is not None:
             self._data = Path(data_dir)
+        self._camera_settings = None            # у новой папки данных свой выбор
         self.forget()
 
     def frame_source(self):
@@ -167,6 +201,27 @@ class MediaLibrary:
             return CONSOLE.frames
         except Exception:
             return None
+
+    def camera_source(self):
+        """Датчик, у которого есть цветная камера. None — камеры нет или не включена.
+
+        Второй раз датчик не открыть: Kinect v2 отдаётся одному процессу, и этот
+        процесс — конвейер пульта. Поэтому камеру берём у него же.
+        """
+        if self._camera is not None:
+            return self._camera
+        source = getattr(self.frame_source(), "sensor", None)
+        return source if hasattr(source, "color_frame") else None
+
+    def camera_available(self) -> bool:
+        """Отдаёт ли датчик цветные кадры прямо сейчас."""
+        source = self.camera_source()
+        if source is None:
+            return False
+        try:
+            return source.color_frame() is not None
+        except Exception:                        # noqa: BLE001 — недоступная камера не ошибка
+            return False
 
     def current_session(self) -> str | None:
         if self._session_id is not None:
@@ -226,13 +281,19 @@ class MediaLibrary:
     def _base_entry(self, entry_id: str, kind: str, path: Path, rel: str,
                     when: float, size: int) -> dict:
         local = time.localtime(when)
+        # Живая съёмка и ландшафт не должны путаться в списке: у записи с камеры
+        # своё название и отдельная пометка.
+        camera = path.name.startswith(CAMERA_PREFIX)
+        titles = CAMERA_KIND_TITLES if camera else KIND_TITLES
         return {
             "id": entry_id,
             "kind": kind,
+            "camera": camera,
             "session": self._session_of(path.parent),
             "name": path.name,
             "path": rel,
-            "title": f"{KIND_TITLES.get(kind, kind)} {time.strftime('%H:%M:%S', local)}",
+            "title": f"{titles.get(kind, KIND_TITLES.get(kind, kind))} "
+                     f"{time.strftime('%H:%M:%S', local)}",
             "t": when,
             "time": time.strftime("%H:%M:%S", local),
             "date": time.strftime("%d.%m.%Y", local),
@@ -408,6 +469,132 @@ class MediaLibrary:
                         "Перенесите старые записи на флешку." if low else None),
         }
 
+    # ---------- запись с цветной камеры ----------
+
+    @property
+    def camera_settings_path(self) -> Path:
+        return self.data_dir / CAMERA_SETTINGS_FILE
+
+    def camera_settings(self) -> dict:
+        """Выбор клиники: режим и рабочая зона. Не читали — прочитаем с диска.
+
+        Любая беда с файлом означает «выключено»: испорченная настройка не имеет
+        права незаметно включить камеру.
+        """
+        path = self.camera_settings_path
+        if self._camera_settings is not None and self._camera_settings_from == path:
+            return dict(self._camera_settings)
+        mode, zone = CAMERA_OFF, camera_zone()
+        try:
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            mode = normalize_camera_mode(saved.get("mode"))
+            if saved.get("zone"):
+                zone = normalize_zone(saved["zone"])
+        except (OSError, ValueError, TypeError, AttributeError):
+            pass                                 # файла нет или он испорчен — «выключено»
+        settings = {"mode": mode, "zone": list(zone)}
+        self._camera_settings, self._camera_settings_from = settings, path
+        return dict(settings)
+
+    def set_camera(self, mode: str | None = None, zone=None) -> dict:
+        """Поменять режим записи с камеры. Чужое значение превращается в «выключено»."""
+        current = self.camera_settings()
+        if mode is not None:
+            asked = str(mode).strip().lower()
+            if asked not in CAMERA_MODES:
+                raise HTTPException(422, f"режим бывает {', '.join(CAMERA_MODES)}")
+            current["mode"] = asked
+        if zone is not None:
+            try:
+                current["zone"] = list(normalize_zone(zone))
+            except ValueError as e:
+                raise HTTPException(422, str(e))
+        path = self.camera_settings_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n",
+                            encoding="utf-8")
+        except OSError as e:
+            raise HTTPException(500, f"настройка камеры не сохранилась: {e}")
+        self._camera_settings, self._camera_settings_from = dict(current), path
+        # «Выключено» действует сразу, даже если запись уже идёт: передумали —
+        # значит с этой секунды с камеры не пишется ничего.
+        if current["mode"] == CAMERA_OFF:
+            self._stop_camera()
+        return self.camera_state()
+
+    def camera_state(self) -> dict:
+        """Что показать в пульте: выбранный режим, список режимов, предупреждение."""
+        settings = self.camera_settings()
+        with self._lock:
+            recorder = self._camera_rec
+        modes = [{"id": name, "title": CAMERA_TITLES[name], "note": CAMERA_NOTES[name],
+                  "warning": CAMERA_WARNING if name == "full" else None}
+                 for name in CAMERA_MODES]
+        state = {
+            "mode": settings["mode"],
+            "mode_title": CAMERA_TITLES[settings["mode"]],
+            "modes": modes,
+            "zone": settings["zone"],
+            "warning": CAMERA_WARNING if settings["mode"] == "full" else None,
+            "available": self.camera_available(),
+            "on": bool(recorder is not None and recorder.running),
+        }
+        if recorder is not None and recorder.running:
+            state["recording"] = recorder.state()
+        if not state["available"] and settings["mode"] != CAMERA_OFF:
+            state["hint"] = ("Режим выбран, но датчик не отдаёт цветные кадры: "
+                             "камеру включают при запуске (SANDBOX_KINECT_COLOR=1).")
+        return state
+
+    def camera_preview(self, mode: str | None = None) -> bytes:
+        """Один кадр — посмотреть, что попадёт в запись. Никуда не сохраняется.
+
+        Ради этого метода всё и затевалось так: обещание «лицо в кадр не
+        попадает» должно быть проверяемым глазами до того, как запись включат.
+        Числа рабочей зоны посчитаны по чертежу; повесят датчик — проверят здесь
+        и поправят зону, если камера встала иначе.
+        """
+        asked = normalize_camera_mode(mode or self.camera_settings()["mode"])
+        if asked == CAMERA_OFF:
+            asked = CAMERA_BOX                   # смотреть «ничего» незачем
+        source = self.camera_source()
+        frame = None
+        if source is not None:
+            try:
+                frame = source.color_frame()
+            except Exception as e:               # noqa: BLE001
+                raise HTTPException(503, f"камера не отдала кадр: {e}")
+        if frame is None:
+            raise HTTPException(503, "камера не включена или кадров ещё не было")
+        jpeg = camera_jpeg(frame.bgr, asked, self.camera_settings()["zone"])
+        if jpeg is None:
+            raise HTTPException(503, "кадр не получился")
+        return jpeg
+
+    def _start_camera(self, directory: Path, session: str, stamp: str) -> dict | None:
+        """Запустить запись с камеры, если её включили. Молчаливо — если нет."""
+        settings = self.camera_settings()
+        if settings["mode"] == CAMERA_OFF:
+            return None
+        source = self.camera_source()
+        if source is None:
+            return None
+        recorder = CameraRecorder(source, directory, prefix=f"{CAMERA_PREFIX}{stamp}",
+                                  fps=int(os.environ.get("SANDBOX_CAMERA_FPS", "10")),
+                                  mode=settings["mode"], zone=settings["zone"],
+                                  session_id=session or "")
+        recorder.start()
+        self._camera_rec = recorder
+        return recorder.state()
+
+    def _stop_camera(self) -> dict | None:
+        with self._lock:
+            recorder, self._camera_rec = self._camera_rec, None
+        if recorder is None:
+            return None
+        return recorder.stop()
+
     # ---------- запись видео ----------
 
     def record_state(self) -> dict:
@@ -437,14 +624,25 @@ class MediaLibrary:
                                          session_id=session or "")
             recorder.start()
             self._recorder = recorder
-            return recorder.state()
+            state = recorder.state()
+            # Камера — отдельной записью и только если её включили.
+            camera = self._start_camera(directory, session or "",
+                                        prefix.split("-", 1)[-1])
+            if camera is not None:
+                state["camera"] = camera
+            return state
 
     def stop_record(self) -> dict:
         with self._lock:
             recorder, self._recorder = self._recorder, None
         if recorder is None:
+            self._stop_camera()                  # камера без ландшафта не пишется
             raise HTTPException(409, "запись не идёт")
         result = recorder.stop()
+        camera = self._stop_camera()
+        if camera is not None:
+            camera["seconds_h"] = human_seconds(camera.get("seconds", 0))
+            result["camera"] = camera
         result["seconds_h"] = human_seconds(result.get("seconds", 0))
         self.forget()
         with self._lock:
@@ -456,6 +654,7 @@ class MediaLibrary:
         disk = self.disk()
         return {
             "recording": self.record_state(),
+            "camera": self.camera_state(),
             "disk": disk,
             "disk_warning": disk.get("warning"),
             "ffmpeg": bool(ffmpeg_path()),
@@ -466,9 +665,14 @@ MEDIA = MediaLibrary()
 
 
 def configure(frames=None, session_id=None, root: Path | None = None,
-              data_dir: Path | None = None) -> None:
-    """Короткий путь для app.py: media.configure(frames=..., session_id=...)."""
-    MEDIA.configure(frames=frames, session_id=session_id, root=root, data_dir=data_dir)
+              data_dir: Path | None = None, camera=None) -> None:
+    """Короткий путь для app.py: media.configure(frames=..., session_id=...).
+
+    camera — датчик с цветной камерой. Не передали — возьмём у конвейера пульта
+    (frames.sensor), если он его показывает.
+    """
+    MEDIA.configure(frames=frames, session_id=session_id, root=root,
+                    data_dir=data_dir, camera=camera)
 
 
 def media_state() -> dict:
@@ -559,6 +763,42 @@ def api_record_stop() -> dict:
     return {"ok": True, "record": result,
             "items": MEDIA.list(session=result.get("session") or None),
             "recording": MEDIA.record_state(), "disk": MEDIA.disk()}
+
+
+@router.get("/api/record/camera")
+def api_camera_state() -> dict:
+    """Режим записи с цветной камеры: какой выбран, какие бывают, чем грозит."""
+    return {"ok": True, "camera": MEDIA.camera_state()}
+
+
+@router.post("/api/record/camera")
+def api_camera_set(body: CameraBody | None = None) -> dict:
+    """Выбрать режим записи с камеры: off (по умолчанию) | box | full.
+
+    Режим «полностью» пишет лицо ребёнка. Пульт обязан показать рядом с ним
+    предупреждение: нужны согласия родителей и правила хранения — оно приходит
+    в ответе полем warning.
+    """
+    body = body or CameraBody()
+    state = MEDIA.set_camera(mode=body.mode, zone=body.zone)
+    messages = {
+        "off": "С камеры ничего не пишется.",
+        "box": "Пишу только ящик: руки и песок, лицо в кадр не попадает.",
+        "full": "Пишу весь кадр. Нужны согласия родителей и правила хранения.",
+    }
+    return {"ok": True, "camera": state, "message": messages[state["mode"]],
+            "warning": state.get("warning")}
+
+
+@router.get("/api/record/camera/preview", include_in_schema=False)
+def api_camera_preview(mode: str | None = None) -> Response:
+    """Показать один кадр так, как он ляжет в запись. Ничего не сохраняет.
+
+    Без ?mode= берётся выбранный режим; если выбрано «выключено» — показывается
+    «только ящик»: именно его и приходят проверять.
+    """
+    return Response(MEDIA.camera_preview(mode), media_type="image/jpeg",
+                    headers={"Cache-Control": "no-store"})
 
 
 @router.get("/api/media/ffmpeg", include_in_schema=False)

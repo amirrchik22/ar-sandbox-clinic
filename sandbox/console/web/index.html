@@ -164,6 +164,23 @@
 
   <!-- ================= ЭКРАН «ЗАПИСИ» ================= -->
   <main class="screen" id="screen-media" role="tabpanel" aria-labelledby="tab-media" hidden>
+    <section class="card" id="cameraCard" hidden>
+      <h2>Запись с камеры датчика</h2>
+      <p class="hint" style="margin-top:0">У датчика есть цветная камера, она смотрит
+        на песок сверху. Решает клиника: по умолчанию с неё не пишется ничего.</p>
+      <div class="field">
+        <div class="lab"><span>Сейчас выбрано</span><b id="camVal">—</b></div>
+        <div class="choices" id="camModes"></div>
+      </div>
+      <p class="hint" id="camNote"></p>
+      <p class="note-server" id="camWarn" hidden></p>
+      <button class="row1" id="btnCamPreview">Посмотреть, что попадёт в запись</button>
+      <div id="camPreviewBox" hidden>
+        <img id="camPreview" alt="Кадр камеры так, как он ляжет в запись"
+             style="display:block;width:100%;border-radius:10px;margin-top:10px">
+      </div>
+    </section>
+
     <section class="card" id="sessionsCard">
       <h2>Прошлые занятия</h2>
       <p class="note-server" id="mediaOffline" hidden></p>

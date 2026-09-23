@@ -12,6 +12,13 @@
 # Флаг -DCMAKE_POLICY_VERSION_MINIMUM=3.5 обязателен: свежий CMake иначе падает на
 # "Compatibility with CMake < 3.5 has been removed".
 # Драйвер OpenNI2 и CUDA нам не нужны — выключены, сборка быстрее.
+#
+# Про цветную камеру (ключ --color у kinect_grabber). Картинка идёт по USB сжатой
+# в JPEG, и распаковывает её сама libfreenect2. Своего распаковщика мы не ставим:
+# на Маке работает VideoToolbox (аппаратно, ничего доставлять не надо), на Linux —
+# TurboJPEG из пакета libturbojpeg0-dev. Ниже, после сборки, скрипт честно пишет,
+# нашёлся ли распаковщик: без него ключ --color включится, но цветных кадров не
+# будет. Глубине распаковщик не нужен вовсе.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -59,4 +66,18 @@ c++ -std=c++11 -O2 -Wall \
   -o "$OUT/kinect_grabber" \
   -L"$LIBBUILD/lib" -lfreenect2 -Wl,-rpath,"$LIBBUILD/lib"
 
+# 4. Что получилось с цветом: смотрим, что включила сборка библиотеки.
+CFG="$LIBBUILD/libfreenect2/config.h"
+if [ -f "$CFG" ]; then
+  if grep -q "define LIBFREENECT2_WITH_VT_SUPPORT" "$CFG"; then
+    echo "цветная камера: распаковка через VideoToolbox (аппаратно, macOS)"
+  elif grep -q "define LIBFREENECT2_WITH_TURBOJPEG_SUPPORT" "$CFG"; then
+    echo "цветная камера: распаковка через TurboJPEG"
+  else
+    echo "цветная камера: распаковщика JPEG нет — ключ --color не даст кадров."
+    echo "  Ubuntu: sudo apt install libturbojpeg0-dev, затем bash tools/build_grabber.sh --rebuild"
+  fi
+fi
+
 echo "готово: $OUT/kinect_grabber"
+echo "проверка цвета: $OUT/kinect_grabber --color --frames 60 > /dev/null"

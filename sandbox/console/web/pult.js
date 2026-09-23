@@ -205,7 +205,7 @@ function showScreen(name) {
   // Поток картинки держим только там, где он виден.
   if (live) { if (name === 'now') live.start(); else live.stop(); }
   if (name === 'kids') loadPeople({ reload: true });
-  if (name === 'media') loadSessions();
+  if (name === 'media') { loadSessions(); loadCamera(); }
 }
 
 // ------------------------------------------------------------------ люди
@@ -1165,6 +1165,51 @@ el('btnCalib').onclick = async () => {
   if (!r.ok) { fail(r); return; }
   toast('Разровняйте песок и не трогайте пару секунд');
   setTimeout(refresh, 1500);
+};
+
+// --- запись с камеры датчика: решение клиники, живёт на экране «Записи» ---
+
+let camState = null;
+
+async function loadCamera() {
+  const card = el('cameraCard');
+  if (!card) return;
+  const r = await api('GET', '/api/record/camera');
+  if (!r.ok || !r.data || !r.data.camera) { card.hidden = true; return; }
+  camState = r.data.camera;
+  card.hidden = !camState.available;
+  renderCamera();
+}
+
+function renderCamera() {
+  if (!camState) return;
+  el('camVal').textContent = camState.mode_title || '—';
+  const box = el('camModes');
+  box.innerHTML = '';
+  (camState.modes || []).forEach((m) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = m.title;
+    if (m.id === camState.mode) b.className = 'on';
+    b.onclick = async () => {
+      const r = await api('POST', '/api/record/camera', { mode: m.id });
+      if (!r.ok) { fail(r); return; }
+      toast('Запись с камеры: ' + m.title);
+      loadCamera();
+    };
+    box.appendChild(b);
+  });
+  const cur = (camState.modes || []).find((m) => m.id === camState.mode);
+  el('camNote').textContent = cur ? (cur.note || '') : '';
+  const warn = el('camWarn');
+  warn.hidden = !(cur && cur.warning);
+  if (cur && cur.warning) warn.textContent = cur.warning;
+}
+
+el('btnCamPreview').onclick = () => {
+  const box = el('camPreviewBox');
+  box.hidden = false;
+  el('camPreview').src = '/api/record/camera/preview?t=' + Date.now();
 };
 
 el('btnRemember').onclick = () => rememberForChild();

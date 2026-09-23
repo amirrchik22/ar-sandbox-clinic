@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AR-песочница для клиники</title>
-<meta name="description" content="Интерактивная песочница: из чего состоит, какие устройства нужны и как они соединяются.">
+<meta name="description" content="Интерактивная песочница: из чего состоит, какие устройства нужны, что уже сделано и что осталось.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -43,6 +43,8 @@ p { margin: .6rem 0; }
 a { color: var(--accent); }
 header.top { border-bottom: 1px solid var(--line); background: var(--bg-2); }
 header.top .wrap { padding-block: 44px 38px; }
+.status { max-width: 62ch; font-size: .97rem; border-left: 3px solid var(--accent); padding-left: .8rem; margin-top: 1.1rem; }
+.status b { font-family: var(--font-head); }
 section { border-bottom: 1px solid var(--line); }
 section .wrap { padding-block: 34px; }
 .btns { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; }
@@ -54,6 +56,7 @@ th, td { text-align: left; vertical-align: top; padding: .62em .7em .62em 0; bor
 th { font-family: var(--font-head); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 td:first-child { font-family: var(--font-head); font-weight: 700; padding-right: 1.2em; }
 .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .93em; }
+@media (min-width: 720px) { td.num { white-space: nowrap; } }
 figure { margin: 1.1rem 0 0; }
 figure img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 10px; }
 figcaption { font-size: .82rem; color: var(--muted); margin-top: .5rem; }
@@ -62,10 +65,29 @@ figcaption { font-size: .82rem; color: var(--muted); margin-top: .5rem; }
 .cols h3 { font-family: var(--font-head); font-size: .95rem; margin: 0 0 .35rem; }
 .cols ul { margin: 0; padding-left: 1.05rem; color: var(--muted); font-size: .93rem; }
 .cols li { margin-bottom: .25rem; }
+ul.check { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: .7rem 2.2rem; }
+@media (min-width: 720px) { ul.check { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+ul.check li { position: relative; padding-left: 2.1rem; font-size: .95rem; color: var(--muted); }
+ul.check li::before { content: ""; position: absolute; left: 0; top: .16em; width: 1.35rem; height: 1.35rem; border-radius: 7px; background: var(--accent); }
+ul.check li::after { content: ""; position: absolute; left: .47rem; top: .42em; width: .34rem; height: .66rem; border: solid var(--accent-text); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+ul.check b { font-family: var(--font-head); font-weight: 700; color: var(--text); }
 ol.steps { counter-reset: s; list-style: none; margin: 1rem 0 0; padding: 0; }
 ol.steps li { position: relative; padding-left: 2.4rem; margin-bottom: 1rem; }
 ol.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: .05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 1px solid var(--line-2); display: grid; place-items: center; font-family: var(--font-mono); font-size: .82rem; color: var(--muted); }
 ol.steps b { font-family: var(--font-head); }
+ol.todo li { margin-bottom: .8rem; font-size: .96rem; color: var(--muted); }
+ol.todo b { color: var(--text); }
+ul.qs { list-style: none; margin: 1rem 0 0; padding: 0; }
+ul.qs li { position: relative; padding-left: 1.5rem; margin-bottom: .6rem; font-size: .96rem; color: var(--muted); }
+ul.qs li::before { content: "?"; position: absolute; left: 0; top: 0; font-family: var(--font-head); font-weight: 800; color: var(--warm); }
+ul.qs b { font-family: var(--font-head); font-weight: 700; color: var(--text); }
+.note { margin-top: 1.3rem; border: 1px solid var(--line-2); border-radius: 12px; padding: 1.05rem 1.15rem; background: var(--bg-2); }
+.note h3 { font-family: var(--font-head); font-size: .98rem; margin: 0 0 .7rem; }
+dl.spec { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: .4rem 1.2rem; margin: 0; font-size: .94rem; }
+dl.spec dt { font-family: var(--font-head); font-weight: 700; }
+dl.spec dd { margin: 0; color: var(--muted); }
+@media (max-width: 620px) { dl.spec { grid-template-columns: 1fr; gap: 0; } dl.spec dd { margin-bottom: .6rem; } }
+.note p { font-size: .93rem; color: var(--muted); margin: .9rem 0 0; }
 .wire { width: 100%; height: auto; margin-top: 1rem; overflow-x: auto; }
 .wire svg { display: block; width: 100%; min-width: 520px; height: auto; }
 .wirebox { overflow-x: auto; }
@@ -82,12 +104,33 @@ footer a { margin-right: 1.1rem; display: inline-block; }
     <div class="eyebrow">Проект для клиники</div>
     <h1>AR-песочница</h1>
     <p class="lead">Ящик с песком у стены. Сверху датчик глубины и проектор: ребёнок лепит рельеф руками, а на песок сразу ложится карта — низины синие, горы коричневые, между ними горизонтали. Занятие ведёт специалист.</p>
+    <p class="status"><b>Где мы сейчас.</b> Датчик куплен и проверен живьём, программа работает и уже показывается на столе. Осталось железо: проектор, ноутбук, короб и крепление.</p>
     <div class="btns">
       <a class="btn main" href="3d.html">Смотреть 3D-модель</a>
       <a class="btn" href="https://github.com/amirrchik22/ar-sandbox-clinic">Репозиторий</a>
     </div>
   </div>
 </header>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Готово</div>
+    <h2>Что уже сделано</h2>
+    <ul class="check">
+      <li><b>Датчик куплен и проверен живьём.</b> Kinect v2: шум по высоте <span class="num">1,3 мм</span>, годных точек <span class="num">99 %</span>, прямой порт USB 3.0 на полной скорости</li>
+      <li><b>Программа читает датчик.</b> Карта высот с горизонталями, <span class="num">18</span> кадров в секунду; ровный уровень программа находит сама по самому песку</li>
+      <li><b>Пульт открывается с телефона, планшета и ноутбука.</b> Без пароля: специалист и ребёнок выбираются одним касанием</li>
+      <li><b>Режимы занятия.</b> Карта, Спокойный, Два цвета, Только вода; пауза и заморозка картинки</li>
+      <li><b>Карточки детей.</b> У каждого свои настройки и заметки — включаются сами, когда начинается занятие</li>
+      <li><b>Записи занятия.</b> Снимки, запись видео ландшафта, библиотека записей, отчёт по занятию</li>
+      <li><b>Настольный режим.</b> Датчик на стопке книг над столом: программу можно показывать до сборки короба, проектор не нужен</li>
+      <li><b>Запуск двойным щелчком.</b> Windows, Mac и Linux — одна и та же программа</li>
+      <li><b>Расчёт размещения у стены.</b> Высоты, вынос датчика, луч проектора, кабели — с чертежами</li>
+      <li><b>3D-модель и этот сайт.</b> Можно покрутить сборку и показать её клинике</li>
+    </ul>
+    <p class="rules">Программа проверена сквозным прогоном в браузере: выбор специалиста и ребёнка, старт, все четыре режима, пауза, заморозка, снимок, видео, завершение и отчёт. Автотестов <span class="num">145</span>, все зелёные.</p>
+  </div>
+</section>
 
 <section>
   <div class="wrap">
@@ -99,12 +142,12 @@ footer a { margin-right: 1.1rem; display: inline-block; }
       <tr><td>Песок</td><td>Слой <span class="num">180 мм</span> — хватает, чтобы копать до дна и не упираться. Поверхность <span class="num">198 мм</span> от пола. Нужно <span class="num">173 л</span>, это около <span class="num">259 кг</span> кварцевого просеянного</td></tr>
       <tr><td>Борт</td><td><span class="num">300 мм</span> над дном, верх борта <span class="num">318 мм</span> от пола. Над песком остаётся свободных <span class="num">120 мм</span> — песок не выносится наружу. Кромку скругляем, внутренние швы на герметик, углы на уголки, чтобы песок не уходил в стыки</td></tr>
       <tr><td>Датчик</td><td>Ось <span class="num">450 мм</span> от стены, <span class="num">1,45 м</span> от пола — это <span class="num">1,25 м</span> над песком. Вынос фиксированный: над центром ящика датчик резал бы луч проектора</td></tr>
-      <tr><td>Проектор</td><td>Объектив <span class="num">1,95 м</span> от пола и <span class="num">80 мм</span> от стены, смотрит вниз с наклоном <span class="num">2,6°</span>. Картинка на песке — от стены до <span class="num">910 мм</span>, ящик накрыт целиком</td></tr>
+      <tr><td>Проектор</td><td>Объектив <span class="num">1,90–2,10 м</span> от пола и <span class="num">80 мм</span> от стены, смотрит вниз (на чертеже — рабочая точка <span class="num">1,95 м</span>, наклон <span class="num">2,6°</span>). Высота — окно, а не одна цифра: чем выше объектив, тем шире картинка, и под свою высоту подбирается зум. Песок накрыт целиком</td></tr>
       <tr><td>Крепление</td><td>Рейка <span class="num">40 × 40</span> на трёх анкерах M8 (<span class="num">1,30–2,30 м</span>), Г-образная консоль под датчик, кронштейн проектора, страховочный тросик</td></tr>
     </table>
     <figure>
       <img src="img/wall-placement.svg" alt="Чертёж вида сбоку: ящик с песком на полу у стены, датчик на консоли в 450 мм от стены на высоте 1,45 м, проектор выше на 1,95 м, конус датчика и луч проектора не пересекаются, ребёнок у переднего борта">
-      <figcaption>Вид сбоку, в масштабе. Конус датчика и луч проектора не пересекаются — тени на песке нет. <a href="img/wall-plan.svg">Вид сверху</a></figcaption>
+      <figcaption>Вид сбоку, в масштабе. Конус датчика и луч проектора не пересекаются — тени на песке нет. <a href="img/wall-plan.svg">Вид сверху</a>. Высоты железа и вынос 450 мм на чертеже верные; подписи короба ещё старые — борт и слой песка стали больше (300 и 180 мм).</figcaption>
     </figure>
   </div>
 </section>
@@ -117,18 +160,18 @@ footer a { margin-right: 1.1rem; display: inline-block; }
       <tr><th>Устройство</th><th>Зачем нужно</th><th>Главное</th></tr>
       <tr>
         <td>Датчик глубины<br>Kinect v2</td>
-        <td>Меряет расстояние до каждой точки песка и отдаёт карту высот. Работает инфракрасным светом, поэтому проекция ему не мешает</td>
-        <td class="num">512 × 424 · 70° × 60°<br>зона 1,75 × 1,45 м<br>3,4 мм на точку<br>USB 3.0 (Intel / Renesas)</td>
+        <td>Меряет расстояние до каждой точки песка и отдаёт карту высот. Работает инфракрасным светом, поэтому проекция ему не мешает. Куплен и проверен</td>
+        <td class="num">512 × 424 точки<br>поле 70° × 60°<br>зона 1,75 × 1,45 м<br>3,4 мм на точку<br>шум 1,3 мм<br>USB 3.0 напрямую</td>
       </tr>
       <tr>
         <td>Проектор</td>
-        <td>Рисует карту прямо на песке. Висит объективом вниз, геометрию правит программа, а не автотрапеция</td>
-        <td class="num">XGA или WXGA<br>3300–4000 лм<br>отношение 1,3–1,6 (рабочее 1,41)<br>игровой режим</td>
+        <td>Рисует карту прямо на песке. Висит объективом вниз, геометрию правит программа, а не автотрапеция. Выбираем — требования в окне ниже</td>
+        <td class="num">XGA или WXGA<br>3300–4000 лм<br>отношение 1,36–1,51<br>объектив 1,90–2,10 м</td>
       </tr>
       <tr>
         <td>Компьютер</td>
         <td>Принимает карту высот, красит её и отдаёт картинку проектору. Ведёт занятие, пишет видео и отчёт. Берём ноутбук: аккумулятор заменяет источник бесперебойного питания, экран и клавиатура уже есть</td>
-        <td class="num">ноутбук<br>USB 3.0 напрямую, без хаба<br>HDMI на проектор</td>
+        <td class="num">ноутбук<br>USB 3.0 без хаба<br>HDMI на проектор<br>SSD от 512 ГБ</td>
       </tr>
       <tr>
         <td>Короб и крепление</td>
@@ -136,6 +179,28 @@ footer a { margin-right: 1.1rem; display: inline-block; }
         <td class="num">фанера 18 мм<br>рейка 40 × 40<br>анкеры M8</td>
       </tr>
     </table>
+
+    <div class="note">
+      <h3>Окно по проектору: в него должна попасть модель</h3>
+      <dl class="spec">
+        <dt>Картинка XGA 4:3</dt>
+        <dd><span class="num">1,26 × 0,94 м</span> на песке, проекционное отношение <span class="num">1,36–1,51</span></dd>
+        <dt>Картинка WXGA 16:10</dt>
+        <dd><span class="num">1,34 × 0,84 м</span> на песке, проекционное отношение <span class="num">1,27–1,42</span></dd>
+        <dt>Высота объектива</dt>
+        <dd><span class="num">1,90–2,10 м</span> от пола: отношение выбирается под ту высоту, на которую встанет кронштейн</dd>
+        <dt>Яркость</dt>
+        <dd><span class="num">3300–4000 лм</span></dd>
+        <dt>Объективом вниз</dt>
+        <dd>разрешено в паспорте («вертикальная проекция», «360°») — это главный отсев; иначе проектор горизонтально и зеркало 45°</dd>
+        <dt>Отклик</dt>
+        <dd>режим низкой задержки (игровой); автотрапеция, интерполяция кадров и «улучшайзеры» отключаются — геометрию делает программа</dd>
+        <dt>Горячий воздух</dt>
+        <dd>выдув не вверх: над проектором натяжной потолок</dd>
+      </dl>
+      <p>Разрешение выше XGA брать незачем. Точка проектора на песке — около <span class="num">1,2 мм</span>, точка датчика — <span class="num">3,4 мм</span>. Мельче датчика картинка всё равно не станет: узкое место здесь он, а не проектор.</p>
+    </div>
+
     <p class="rules">Ответ на движение руки — цель не больше <span class="num">150 мс</span>. Из них датчик съедает <span class="num">60–70</span>, обработка и отрисовка <span class="num">50–90</span>, проектор в игровом режиме <span class="num">16–40</span>.</p>
   </div>
 </section>
@@ -158,12 +223,12 @@ footer a { margin-right: 1.1rem; display: inline-block; }
             <text x="93" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">на консоли, 1,45 м</text>
 
             <rect x="265" y="30" width="170" height="56" rx="9" fill="none" stroke="var(--line-2)" stroke-width="1.6"/>
-            <text x="350" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Компьютер</text>
+            <text x="350" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Ноутбук</text>
             <text x="350" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">в тумбе сбоку</text>
 
             <rect x="522" y="30" width="170" height="56" rx="9" fill="none" stroke="var(--warm)" stroke-width="1.6"/>
             <text x="607" y="54" text-anchor="middle" fill="var(--text)" font-weight="600">Проектор</text>
-            <text x="607" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">на стене, 1,95 м</text>
+            <text x="607" y="72" text-anchor="middle" fill="var(--muted)" font-size="11.5">на стене, 1,90–2,10 м</text>
 
             <g color="var(--muted)">
               <line x1="180" y1="58" x2="258" y2="58" stroke="currentColor" stroke-width="1.6" marker-end="url(#ar)"/>
@@ -187,7 +252,7 @@ footer a { margin-right: 1.1rem; display: inline-block; }
         </svg>
       </div>
     </div>
-    <p class="rules">Датчик включается в порт компьютера напрямую, без хабов: на дешёвых хабах и контроллерах AMD он часто не определяется. Все кабели идут в закрытом канале по стене и вдоль плинтуса — в зоне, куда достаёт ребёнок, ни одного открытого провода.</p>
+    <p class="rules">Датчик включается в порт компьютера напрямую, без хабов: проверено живьём — через разветвитель кадры не доходят. Все кабели идут в закрытом канале по стене и вдоль плинтуса — в зоне, куда достаёт ребёнок, ни одного открытого провода.</p>
   </div>
 </section>
 
@@ -207,9 +272,9 @@ footer a { margin-right: 1.1rem; display: inline-block; }
       <div>
         <h3>Покупаем</h3>
         <ul>
-          <li>Kinect v2 с адаптером для ПК</li>
+          <li>Kinect v2 с адаптером для ПК — куплен</li>
           <li>Проектор с допуском «объективом вниз»</li>
-          <li>Компьютер и кронштейн проектора</li>
+          <li>Ноутбук и кронштейн проектора</li>
           <li>Песок, фанера, анкеры, кабели</li>
         </ul>
       </div>
@@ -227,13 +292,32 @@ footer a { margin-right: 1.1rem; display: inline-block; }
 
 <section>
   <div class="wrap">
-    <div class="eyebrow">Порядок</div>
-    <h2>Как идём</h2>
-    <ol class="steps">
-      <li><b>Собираем железо.</b> Короб, рейка, консоль, датчик и проектор на своих высотах, кабели в каналах.</li>
-      <li><b>Проверяем готовой программой.</b> Бесплатный Magic Sand на неделю: убеждаемся, что датчик видит песок, картинка совпадает с рельефом и задержка укладывается в норму.</li>
-      <li><b>Ставим свою программу.</b> Сеансы с записью, профили детей, спокойные режимы, отчёты. Компьютер работает в режиме киоска: включил — и сразу занятие.</li>
+    <div class="eyebrow">Дальше</div>
+    <h2>Что осталось сделать</h2>
+    <ol class="steps todo">
+      <li><b>Выбрать и купить проектор.</b> Требования — в окне выше; первым делом спрашиваем у продавца строку в паспорте про установку объективом вниз.</li>
+      <li><b>Купить ноутбук.</b> Прямой порт USB 3.0 (через хаб датчик не работает), выход HDMI, SSD от 512 ГБ под записи занятий.</li>
+      <li><b>Собрать короб.</b> 1200 × 800 внутри, борт 300 мм, засыпать 173 л песка — около 259 кг.</li>
+      <li><b>Повесить железо.</b> Рейка, Г-образная консоль и кронштейн проектора по чертежам, кабели убрать в каналы.</li>
+      <li><b>Совместить проектор с датчиком.</b> Картинка подгоняется по четырём углам ящика — автоматически, через цветную камеру самого датчика.</li>
+      <li><b>Замерить задержку.</b> Телефоном на 240 кадров в секунду: от движения руки до перекраски должно быть не больше 150 мс.</li>
+      <li><b>Решить с клиникой про запись с камеры.</b> На цветной камере видны руки; если писать полный кадр — попадает и лицо, и тогда нужны согласия родителей.</li>
+      <li><b>Задания для детей.</b> Остров, река, клад, повтори — делаем после того, как специалисты поработают на базовой версии.</li>
+      <li><b>Перенести на кабинетный компьютер.</b> Режим киоска: включил — и сразу занятие, без настройщика.</li>
     </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Уточнить</div>
+    <h2>Вопросы к клинике</h2>
+    <ul class="qs">
+      <li><b>Материал стены.</b> Бетон или кирпич — анкеры M8. Гипсокартон — крепим в стойки каркаса или ставим напольную стойку.</li>
+      <li><b>Высота натяжного потолка.</b> Нужно не меньше 2,35 м; ниже — объектив опускается, и зум подбирается заново.</li>
+      <li><b>Сколько специалистов будет вести занятия.</b> И видит ли каждый записи чужих занятий или только свои.</li>
+      <li><b>Нужна ли запись с цветной камеры.</b> От ответа зависит, нужны ли согласия родителей на видео.</li>
+    </ul>
   </div>
 </section>
 
@@ -242,7 +326,7 @@ footer a { margin-right: 1.1rem; display: inline-block; }
     <a href="3d.html">3D-модель</a>
     <a href="https://github.com/amirrchik22/ar-sandbox-clinic">Исходники и расчёты</a>
     <a href="https://amirrchik22.github.io/ar-sandbox/">Презентация для клиники</a>
-    <p>Оборудование и программа для развивающих и коррекционных занятий под контролем специалиста. Обновлено 23.09.2026.</p>
+    <p>Оборудование и программа для развивающих и коррекционных занятий под контролем специалиста. Обновлено 24.09.2026.</p>
   </div>
 </footer>
 

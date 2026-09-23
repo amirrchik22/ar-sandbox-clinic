@@ -15,6 +15,18 @@ tools/build_grabber.sh): она печатает кадры в стандарт�
 Формат кадра в потоке: "KIN2", номер кадра uint32, ширина uint32, высота
 uint32, затем 512*424 расстояний float32 в миллиметрах (0 = нет данных).
 
+Цветная камера. У датчика есть ещё и обычная камера, 1920x1080 и 30 кадров в
+секунду. Занятию она не нужна, поэтому по умолчанию не включается вовсе: в
+кадр попадает лицо ребёнка, а это персональные данные несовершеннолетнего.
+Включается отдельно — Kinect2Sensor(color=True); тогда программа захвата
+запускается с ключом --color и добавляет в тот же поток цветные кадры со своим
+заголовком: "KINC", номер uint32, ширина uint32, высота uint32, формат uint32
+(1 = BGR), длина uint32, дальше точки. Кадр приходит уменьшенным вдвое
+(960x540) — так через трубу идёт 1,5 МБ на кадр вместо 8 МБ.
+
+Главное правило потока: кадры глубины не теряются никогда, цветные роняются
+свободно. Занятие ведётся по рельефу, видео с камеры — дело десятое.
+
 Геометрия объекта: ось датчика 1,30 м над песком (1,45 м от пола), зона охвата
 на этой высоте 1,82×1,50 м, 3,6 мм на точку (ящик 1,2 м — 337 точек поперёк),
 шум по высоте ≈ 2 мм (живой замер 23.09 на дистанции 0,89 м дал 1,3 мм). Зона
@@ -43,8 +55,15 @@ from .base import ColorFrame, DepthFrame, Intrinsics, SensorHealth
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_GRABBER = ROOT / "build" / "kinect_grabber"
 
-MAGIC = b"KIN2"
+MAGIC = b"KIN2"                       # кадр глубины
+MAGIC_COLOR = b"KINC"                 # кадр цветной камеры
 HEADER = struct.Struct("<4sIII")      # магическое слово, номер кадра, ширина, высота
+DEPTH_TAIL = struct.Struct("<III")    # после магического слова: номер, ширина, высота
+COLOR_TAIL = struct.Struct("<IIIII")  # номер, ширина, высота, формат, длина данных
+COLOR_BGR = 1                         # единственный пока формат цветного кадра
+
+# Больше этого цветной кадр быть не может — защита от сбившегося потока.
+COLOR_MAX_BYTES = 1920 * 1080 * 3
 
 
 class Kinect2Error(RuntimeError):
@@ -62,13 +81,21 @@ class Kinect2Sensor:
 
     def __init__(self, grabber: str | os.PathLike | None = None, pipeline: str = "cpu",
                  serial: str | None = None, start_timeout: float = 60.0,
-                 restart: bool = True, max_restarts: int = 20) -> None:
+                 restart: bool = True, max_restarts: int = 20,
+                 color: bool = False, color_fps: float = 10.0,
+                 color_scale: int = 2) -> None:
         self.grabber = Path(grabber or os.environ.get("SANDBOX_KINECT_GRABBER") or DEFAULT_GRABBER)
         self.pipeline = pipeline            # cpu (проверено) | opencl (на Ubuntu с видеокартой)
         self.serial = serial
         self.start_timeout = start_timeout
         self.restart = restart              # перезапускать программу захвата, если она упала
         self.max_restarts = max_restarts
+        # Цветная камера: по умолчанию выключена — так решено, в кадр попадает
+        # лицо ребёнка. Переменная SANDBOX_KINECT_COLOR=1 включает её без правки
+        # кода: пригодится, когда клиника решит, что запись с камеры ей нужна.
+        self.color = bool(color or os.environ.get("SANDBOX_KINECT_COLOR") == "1")
+        self.color_fps = float(color_fps)
+        self.color_scale = int(color_scale)
 
         self._proc: subprocess.Popen | None = None
         self._reader: threading.Thread | None = None
@@ -83,6 +110,10 @@ class Kinect2Sensor:
         self._health = SensorHealth()
         self._stderr_tail: deque[str] = deque(maxlen=20)
         self._restarts = 0
+        self._color: np.ndarray | None = None     # последний цветной кадр, BGR uint8
+        self._color_t: float = 0.0
+        self._color_seq: int = 0
+        self._color_stamps: deque[float] = deque(maxlen=30)
 
     # ---------- запуск и остановка ----------
 
@@ -94,6 +125,9 @@ class Kinect2Sensor:
                 f"нет программы захвата {self.grabber}; соберите её: bash tools/build_grabber.sh")
         with self._lock:                 # начинаем занятие с чистого счётчика кадров
             self._frame = None
+            self._color = None
+            self._color_seq = 0
+            self._color_stamps.clear()
             self._seq = self._taken = 0
             self._stamps.clear()
             self._stderr_tail.clear()
@@ -165,7 +199,39 @@ class Kinect2Sensor:
                 self._lock.wait(left)
 
     def color_frame(self) -> ColorFrame | None:
-        return None                      # цветной кадр песочнице не нужен, поток не включаем
+        """Последний кадр цветной камеры или None.
+
+        None значит одно из двух: камера не включена (обычное дело — так стоит по
+        умолчанию) или кадра ещё не было. Ждать здесь нечего: метод не блокирует.
+        Занятие идёт по глубине, и цвет никогда его не задерживает.
+
+        Кадр отдаётся BGR uint8, как договорено в base.py. Время t — монотонное,
+        как у кадра глубины: по нему видно, новый это кадр или тот же самый.
+        """
+        if not self.color:
+            return None
+        with self._lock:
+            frame, t = self._color, self._color_t
+        if frame is None:
+            return None
+        return ColorFrame(t, frame)
+
+    def color_stats(self) -> dict:
+        """Что происходит с цветной камерой — для пульта и журнала."""
+        with self._lock:
+            seq, t = self._color_seq, self._color_t
+            stamps = list(self._color_stamps)
+        fps = 0.0
+        if len(stamps) >= 2:
+            span = stamps[-1] - stamps[0]
+            if span > 0:
+                fps = round((len(stamps) - 1) / span, 1)
+        size = None
+        with self._lock:
+            if self._color is not None:
+                size = (int(self._color.shape[1]), int(self._color.shape[0]))
+        return {"on": self.color, "frames": seq, "fps": fps, "size": size,
+                "last_t": t}
 
     def intrinsics(self) -> Intrinsics:
         return Intrinsics(fx=self.NOMINAL_FX, fy=self.NOMINAL_FY,
@@ -191,12 +257,19 @@ class Kinect2Sensor:
 
     # ---------- внутреннее ----------
 
-    def _spawn(self) -> None:
+    def _command(self) -> list[str]:
+        """Чем запускаем программу захвата. Отдельным методом — чтобы можно было проверить."""
         cmd = [str(self.grabber), "--pipeline", self.pipeline, "--quiet"]
         if self.serial:
             cmd += ["--serial", self.serial]
-        self._proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                      bufsize=0)
+        if self.color:
+            cmd += ["--color", "--color-fps", f"{self.color_fps:g}",
+                    "--color-scale", str(self.color_scale)]
+        return cmd
+
+    def _spawn(self) -> None:
+        self._proc = subprocess.Popen(self._command(), stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE, bufsize=0)
         self._stderr_thread = threading.Thread(target=self._drain_stderr, args=(self._proc,),
                                                name="kinect2-stderr", daemon=True)
         self._stderr_thread.start()
@@ -246,28 +319,63 @@ class Kinect2Sensor:
             self._lock.notify_all()
 
     def _pump(self, proc: subprocess.Popen) -> None:
+        """Разбор потока: по первым четырём байтам видно, кадр какого рода пришёл."""
         stdout = proc.stdout
         assert stdout is not None
         while self._running:
-            head = _read_exactly(stdout, HEADER.size)
-            if head is None:
+            magic = _read_exactly(stdout, 4)
+            if magic is None:
                 return                                    # поток закончился
-            magic, _num, w, h = HEADER.unpack(head)
-            if magic != MAGIC:
+            if magic == MAGIC:
+                if not self._read_depth(stdout):
+                    return
+            elif magic == MAGIC_COLOR:
+                if not self._read_color(stdout):
+                    return
+            else:
                 raise Kinect2Error("поток сбился: не найдено начало кадра")
-            if not (0 < w <= 4096 and 0 < h <= 4096):
-                raise Kinect2Error(f"странный размер кадра {w}×{h}")
-            payload = _read_exactly(stdout, w * h * 4)
-            if payload is None:
-                return
-            frame = np.frombuffer(payload, dtype="<f4").reshape(h, w)
-            now = time.monotonic()
-            with self._lock:
-                self._frame = frame
-                self._frame_t = now
-                self._seq += 1
-                self._stamps.append(now)
-                self._lock.notify_all()
+
+    def _read_depth(self, stdout) -> bool:
+        tail = _read_exactly(stdout, DEPTH_TAIL.size)
+        if tail is None:
+            return False
+        _num, w, h = DEPTH_TAIL.unpack(tail)
+        if not (0 < w <= 4096 and 0 < h <= 4096):
+            raise Kinect2Error(f"странный размер кадра {w}×{h}")
+        payload = _read_exactly(stdout, w * h * 4)
+        if payload is None:
+            return False
+        frame = np.frombuffer(payload, dtype="<f4").reshape(h, w)
+        now = time.monotonic()
+        with self._lock:
+            self._frame = frame
+            self._frame_t = now
+            self._seq += 1
+            self._stamps.append(now)
+            self._lock.notify_all()
+        return True
+
+    def _read_color(self, stdout) -> bool:
+        """Цветной кадр. Держим только последний: прошлый никому не нужен."""
+        tail = _read_exactly(stdout, COLOR_TAIL.size)
+        if tail is None:
+            return False
+        _num, w, h, fmt, length = COLOR_TAIL.unpack(tail)
+        if not (0 < w <= 4096 and 0 < h <= 4096) or length > COLOR_MAX_BYTES:
+            raise Kinect2Error(f"странный цветной кадр {w}×{h}, {length} байт")
+        payload = _read_exactly(stdout, length)
+        if payload is None:
+            return False
+        if fmt != COLOR_BGR or length != w * h * 3:
+            return True                          # непонятный кадр просто пропускаем
+        frame = np.frombuffer(payload, dtype=np.uint8).reshape(h, w, 3)
+        now = time.monotonic()
+        with self._lock:
+            self._color = frame
+            self._color_t = now
+            self._color_seq += 1
+            self._color_stamps.append(now)
+        return True
 
 
 def _kill(proc: subprocess.Popen | None) -> None:

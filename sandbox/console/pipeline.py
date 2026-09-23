@@ -232,6 +232,7 @@ class FrameServer:
         self._settings = HeightmapSettings(palette=MODE_PROFILES[DEFAULT_MODE].palette,
                                            contour_step_mm=0.0)
         self._proc = HeightmapProcessor(self._settings)
+        self.sensor = None                       # живой датчик, когда поток запущен
         self._placement = DEFAULT_PLACEMENT      # где стоит датчик: над ящиком или на столе
         self._shape: tuple[int, int] | None = None
 
@@ -278,6 +279,7 @@ class FrameServer:
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=3.0)
+        self.sensor = None
 
     def set_palette(self, name: str) -> None:
         """Ручной выбор палитры поверх режима. Держится до смены режима."""
@@ -550,6 +552,9 @@ class FrameServer:
 
     def _loop(self) -> None:
         sensor, name, demo, why = open_sensor(self._sensor_name)
+        # Ссылка наружу: модулю записи нужна камера этого же датчика.
+        # Без неё пульт считает, что камеры нет.
+        self.sensor = sensor
         with self._lock:
             self._demo = demo
             self._opening = False
