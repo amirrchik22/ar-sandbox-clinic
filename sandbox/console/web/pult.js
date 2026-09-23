@@ -501,7 +501,19 @@ async function startSession() {
   };
   const r = await api('POST', '/api/session/start', body);
   if (!r.ok) { fail(r); return; }
-  toast('Занятие началось');
+  // Говорим вслух, что настройки ребёнка применились: иначе связь между
+  // карточкой и тем, что происходит на песке, остаётся невидимой.
+  if (child) {
+    const cs = childSettings(child);
+    const bits = [];
+    if (cs.mode) bits.push(MODE_TITLES[cs.mode] || cs.mode);
+    if (cs.brightness != null) bits.push('яркость ' + cs.brightness + ' %');
+    toast(bits.length
+      ? 'Занятие началось · из карточки: ' + bits.join(', ')
+      : 'Занятие началось · в карточке настроек пока нет');
+  } else {
+    toast('Занятие началось');
+  }
   refresh();
 }
 
@@ -549,7 +561,9 @@ function renderKids() {
     const d = document.createElement('details');
     d.className = 'kid';
     d.dataset.id = String(c.id);
-    if (openIds.has(String(c.id))) d.open = true;
+    // Карточка раскрыта сразу, если детей немного: настройки не должны прятаться
+    // за нажатием, которое надо угадать. Проверено на Амире 24.09 — не нашёл их.
+    if (openIds.has(String(c.id)) || people.children.length <= 4) d.open = true;
 
     const sum = document.createElement('summary');
     const left = document.createElement('div');
@@ -563,7 +577,7 @@ function renderKids() {
     if (s.mode) bits.push('режим: ' + (MODE_TITLES[s.mode] || s.mode));
     if (s.brightness != null) bits.push('яркость ' + s.brightness + ' %');
     if (s.duration_min != null) bits.push(s.duration_min + ' мин');
-    meta.textContent = bits.join(' · ') || 'настройки не заданы';
+    meta.textContent = bits.join(' · ') || 'настройки не заданы — нажмите, чтобы задать';
     left.appendChild(meta);
     sum.appendChild(left);
     const right = document.createElement('div');
@@ -666,6 +680,26 @@ function renderKids() {
     d.appendChild(body);
     box.appendChild(d);
   });
+}
+
+// Запомнить то, что сейчас на экране, за ребёнком этого занятия.
+// Это главный способ настроить ребёнка: специалист подбирает режим и яркость
+// прямо во время занятия и одним нажатием закрепляет их за карточкой.
+async function rememberForChild() {
+  const cur = st || {};
+  const ses = cur.session;
+  if (!ses) { toast('Сначала начните занятие'); return; }
+  const id = ses.child && ses.child.id;
+  const child = id != null ? people.children.find((c) => String(c.id) === String(id)) : null;
+  if (!child) { toast('Занятие идёт с «Гостем» — запоминать не за кем'); return; }
+  const mode = cur.mode || currentMode();
+  const rawState = cur.raw || {};
+  const brightness = rawState.brightness != null ? rawState.brightness
+    : (localBright != null ? localBright : undefined);
+  await saveChild(child, { mode: mode, brightness: brightness }, true);
+  const bits = [MODE_TITLES[mode] || mode];
+  if (brightness != null) bits.push('яркость ' + brightness + ' %');
+  toast('Сохранили в карточке: ' + aliasOf(child) + ' · ' + bits.join(', '));
 }
 
 async function saveChild(child, patch, quiet) {
@@ -1046,6 +1080,19 @@ function render(raw) {
   markSwitches();
   updateStartButton();
 
+  // Блок «запомнить для ребёнка»: виден только когда есть за кем запоминать.
+  const remBox = el('rememberBox');
+  if (remBox) {
+    const ses = st.session;
+    const kid = ses && ses.child ? (ses.child.alias || ses.child_alias) : null;
+    const named = kid && kid !== 'Гость';
+    remBox.hidden = !named;
+    if (named) {
+      el('btnRemember').textContent = 'Запомнить эти настройки';
+      el('rememberHint').textContent = 'Подберите режим и яркость — и сохраните в карточке: '
+        + kid + '. В следующее занятие всё включится само.';
+    }
+  }
   if (st.recording != null) recording = !!st.recording;
   el('btnRecord').hidden = !caps.record;
   el('btnRecord').textContent = recording ? 'Остановить запись' : 'Записать видео';
@@ -1119,6 +1166,8 @@ el('btnCalib').onclick = async () => {
   toast('Разровняйте песок и не трогайте пару секунд');
   setTimeout(refresh, 1500);
 };
+
+el('btnRemember').onclick = () => rememberForChild();
 
 el('btnSnap').onclick = async () => {
   const r = await api('POST', '/api/snapshot');
